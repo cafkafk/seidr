@@ -1,0 +1,31 @@
+#+options: toc:nil
+* gg - git gut
+#+html: <img src="https://img.shields.io/badge/license-GPLv3-blue"><img src="https://img.shields.io/badge/Contributor%20Covenant-2.1-4baaaa.svg">
+
+A Rust GitOps/symlinkfarm orchestrator inspired by GNU Stow. Useful for dealing
+with "dotfiles", and with git support as a first class feature. Configuration is
+done throug a single yaml file, giving it a paradigm that should bring joy to
+those that use declarative operating systems and package managers.
+
+Although this isn't really a case where it matters *that* much for performance,
+being written in rust instead of e.g. /janky/ scripting languages does also mean
+it is snappy and reliable, and the /extensive/ testing helps ensure regressions
+aren't introduced.
+
+That said, we're in 0.0.Z, *here be dragons* for now.
+
+** Installation
+#+begin_src sh
+$ git clone https://github.com/cafkafk/git
+$ ./install
+#+end_src
+
+** Configuration
+If you want a template, you can copy the file from tst/config.yaml:
+#+begin_src sh
+$ cp tst/config.yaml ~/.config/gg/config.yaml
+#+end_src
+
+You should *seriously* change this file before running any commands.
+
+The configuration format will likely break regularly in versions 0.Y.Z.
