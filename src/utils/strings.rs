@@ -16,7 +16,7 @@
 
 /// Contains the notice for interactive programs from the GPLv3's "How to Apply
 /// These Terms to Your New Programs"
-const INTERACTIVE_NOTICE: &str = "\
+pub const INTERACTIVE_NOTICE: &str = "\
     gg  Copyright (C) 2023  Christina Sørensen <christina@cafkafk.com>
     This program comes with ABSOLUTELY NO WARRANTY; for details type `show w'.
     This is free software, and you are welcome to redistribute it
@@ -25,7 +25,7 @@ const INTERACTIVE_NOTICE: &str = "\
 
 /// Contains the license part of the long notice for interactive programs from
 /// the GPLv3's "How to Apply These Terms to Your New Programs"
-const INTERACTIVE_LICENSE: &str = "\
+pub const INTERACTIVE_LICENSE: &str = "\
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation, either version 3 of the License, or
@@ -34,7 +34,7 @@ const INTERACTIVE_LICENSE: &str = "\
 
 /// Contains the warranty part of the long notice for interactive programs from
 /// the GPLv3's "How to Apply These Terms to Your New Programs"
-const INTERACTIVE_WARRANTY: &str = "\
+pub const INTERACTIVE_WARRANTY: &str = "\
     This program is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
