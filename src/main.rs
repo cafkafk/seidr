@@ -42,27 +42,28 @@ fn main() {
         _ => (),
     }
     match &args.command {
-        Commands::Link { msg: _ } => {
+        Some(Commands::Link { msg: _ }) => {
             config.link_all();
         }
-        Commands::Quick { msg } => {
+        Some(Commands::Quick { msg }) => {
             config.quick(&msg.as_ref().unwrap());
         }
-        Commands::Clone { msg: _ } => {
+        Some(Commands::Clone { msg: _ }) => {
             config.clone_all();
         }
-        Commands::Pull { msg: _ } => {
+        Some(Commands::Pull { msg: _ }) => {
             config.pull_all();
         }
-        Commands::Add { msg: _ } => {
+        Some(Commands::Add { msg: _ }) => {
             config.add_all();
         }
-        Commands::Commit { msg: _ } => {
+        Some(Commands::Commit { msg: _ }) => {
             config.commit_all();
         }
-        Commands::CommitMsg { msg } => {
+        Some(Commands::CommitMsg { msg }) => {
             config.commit_all_msg(&msg.as_ref().unwrap());
         }
+        None => (),
     }
     trace!("{:?}", config);
 }

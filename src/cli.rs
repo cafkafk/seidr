@@ -29,7 +29,7 @@ const CONFIG_FILE: &str = "/.config/gg/config.yaml";
     long_version=env!("CARGO_PKG_VERSION"),
     about="GitOps for the masses",
     long_about="A Rust GitOps and linkfarm orchestrator inspired by GNU Stow",
-    subcommand_required=true,
+    subcommand_required=false,
     arg_required_else_help=true,
     help_template="\
     {before-help}{name} {version}
@@ -59,7 +59,7 @@ pub struct Args {
     pub code_of_conduct: bool,
 
     #[command(subcommand)]
-    pub command: Commands,
+    pub command: Option<Commands>,
 }
 
 #[derive(Subcommand, Debug)]
