@@ -37,6 +37,7 @@ fn main() {
     let config = Config::new(&args.config);
     match &args {
         args if args.license == true => unimplemented!(),
+        args if args.warranty == true => unimplemented!(),
         args if args.code_of_conduct == true => unimplemented!(),
         _ => (),
     }
