@@ -1,8 +1,34 @@
+//    A Rust GitOps/symlinkfarm orchestrator inspired by GNU Stow.
+//    Copyright (C) 2023  Christina Sørensen <christina@cafkafk.com>
+//
+//    This program is free software: you can redistribute it and/or modify
+//    it under the terms of the GNU General Public License as published by
+//    the Free Software Foundation, either version 3 of the License, or
+//    (at your option) any later version.
+//
+//    This program is distributed in the hope that it will be useful,
+//    but WITHOUT ANY WARRANTY; without even the implied warranty of
+//    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+//    GNU General Public License for more details.
+//
+//    You should have received a copy of the GNU General Public License
+//    along with this program.  If not, see https://www.gnu.org/gpl-3.0.html.
+
 use crate::utils::dir::home_dir;
+use crate::utils::strings::INTERACTIVE_NOTICE;
 
 use clap::{ArgAction, CommandFactory, Parser, Subcommand};
 
 const CONFIG_FILE: &str = "/.config/gg/config.yaml";
+
+const HELP_TEMPLATE: &str = "\
+    {before-help}{name} {version}
+    {author-with-newline}{about-with-newline}
+    {usage-heading} {usage}
+
+    {all-args}{after-help}
+
+    ";
 
 //#[clap(author, version, about, long_about = None)]
 #[derive(Parser, Debug)]
@@ -13,16 +39,9 @@ const CONFIG_FILE: &str = "/.config/gg/config.yaml";
     long_version=env!("CARGO_PKG_VERSION"),
     about="GitOps for the masses",
     long_about="A Rust GitOps and linkfarm orchestrator inspired by GNU Stow",
-    subcommand_required=true,
+    subcommand_required=false,
     arg_required_else_help=true,
-    help_template="\
-    {before-help}{name} {version}
-    {author-with-newline}{about-with-newline}
-    {usage-heading} {usage}
-
-    {all-args}{after-help}
-
-    ",
+    help_template=HELP_TEMPLATE.to_owned()+INTERACTIVE_NOTICE,
 )]
 pub struct Args {
     /// The config file to use
@@ -30,16 +49,20 @@ pub struct Args {
     #[arg(short, long, default_value_t = home_dir() + CONFIG_FILE)]
     pub config: String,
 
-    /// Print full-text license information
+    /// Print license information
     #[arg(long)]
     pub license: bool,
 
-    /// Print full-text code-of-conduct (not implemented)
+    /// Print warranty information
+    #[arg(long)]
+    pub warranty: bool,
+
+    /// Print code-of-conduct information (not implemented)
     #[arg(long)]
     pub code_of_conduct: bool,
 
     #[command(subcommand)]
-    pub command: Commands,
+    pub command: Option<Commands>,
 }
 
 #[derive(Subcommand, Debug)]

@@ -1,3 +1,19 @@
+//    A Rust GitOps/symlinkfarm orchestrator inspired by GNU Stow.
+//    Copyright (C) 2023  Christina Sørensen <christina@cafkafk.com>
+//
+//    This program is free software: you can redistribute it and/or modify
+//    it under the terms of the GNU General Public License as published by
+//    the Free Software Foundation, either version 3 of the License, or
+//    (at your option) any later version.
+//
+//    This program is distributed in the hope that it will be useful,
+//    but WITHOUT ANY WARRANTY; without even the implied warranty of
+//    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+//    GNU General Public License for more details.
+//
+//    You should have received a copy of the GNU General Public License
+//    along with this program.  If not, see https://www.gnu.org/gpl-3.0.html.
+
 extern crate log;
 extern crate pretty_env_logger;
 
@@ -20,33 +36,34 @@ fn main() {
     let args = Args::parse();
     let config = Config::new(&args.config);
     match &args {
-        //args if args.quick == true => config.quick(&args.quick),
-        args if args.license == true => unimplemented!(),
+        args if args.license == true => println!("{}", utils::strings::INTERACTIVE_LICENSE),
+        args if args.warranty == true => println!("{}", utils::strings::INTERACTIVE_WARRANTY),
         args if args.code_of_conduct == true => unimplemented!(),
         _ => (),
     }
     match &args.command {
-        Commands::Link { msg: _ } => {
+        Some(Commands::Link { msg: _ }) => {
             config.link_all();
         }
-        Commands::Quick { msg } => {
+        Some(Commands::Quick { msg }) => {
             config.quick(&msg.as_ref().unwrap());
         }
-        Commands::Clone { msg: _ } => {
+        Some(Commands::Clone { msg: _ }) => {
             config.clone_all();
         }
-        Commands::Pull { msg: _ } => {
+        Some(Commands::Pull { msg: _ }) => {
             config.pull_all();
         }
-        Commands::Add { msg: _ } => {
+        Some(Commands::Add { msg: _ }) => {
             config.add_all();
         }
-        Commands::Commit { msg: _ } => {
+        Some(Commands::Commit { msg: _ }) => {
             config.commit_all();
         }
-        Commands::CommitMsg { msg } => {
+        Some(Commands::CommitMsg { msg }) => {
             config.commit_all_msg(&msg.as_ref().unwrap());
         }
+        None => (),
     }
     trace!("{:?}", config);
 }
