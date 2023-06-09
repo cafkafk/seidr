@@ -15,10 +15,20 @@
 //    along with this program.  If not, see https://www.gnu.org/gpl-3.0.html.
 
 use crate::utils::dir::home_dir;
+use crate::utils::strings::INTERACTIVE_NOTICE;
 
 use clap::{ArgAction, CommandFactory, Parser, Subcommand};
 
 const CONFIG_FILE: &str = "/.config/gg/config.yaml";
+
+const HELP_TEMPLATE: &str = "\
+    {before-help}{name} {version}
+    {author-with-newline}{about-with-newline}
+    {usage-heading} {usage}
+
+    {all-args}{after-help}
+
+    ";
 
 //#[clap(author, version, about, long_about = None)]
 #[derive(Parser, Debug)]
@@ -31,14 +41,7 @@ const CONFIG_FILE: &str = "/.config/gg/config.yaml";
     long_about="A Rust GitOps and linkfarm orchestrator inspired by GNU Stow",
     subcommand_required=false,
     arg_required_else_help=true,
-    help_template="\
-    {before-help}{name} {version}
-    {author-with-newline}{about-with-newline}
-    {usage-heading} {usage}
-
-    {all-args}{after-help}
-
-    ",
+    help_template=HELP_TEMPLATE.to_owned()+INTERACTIVE_NOTICE,
 )]
 pub struct Args {
     /// The config file to use
