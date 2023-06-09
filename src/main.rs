@@ -36,8 +36,8 @@ fn main() {
     let args = Args::parse();
     let config = Config::new(&args.config);
     match &args {
-        args if args.license == true => unimplemented!(),
-        args if args.warranty == true => unimplemented!(),
+        args if args.license == true => println!("{}", utils::strings::INTERACTIVE_LICENSE),
+        args if args.warranty == true => println!("{}", utils::strings::INTERACTIVE_WARRANTY),
         args if args.code_of_conduct == true => unimplemented!(),
         _ => (),
     }
