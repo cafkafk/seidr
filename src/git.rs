@@ -98,7 +98,7 @@ impl GitRepo {
     /// Pulls the repository if able.
     fn pull(&self) {
         let out = Command::new("git")
-            .current_dir(&(self.path.to_owned() + &self.name))
+            .current_dir(format!("{}{}", &self.path, &self.name))
             .arg("pull")
             .status()
             .expect("failed to pull");
@@ -118,7 +118,7 @@ impl GitRepo {
     #[allow(dead_code)]
     fn commit(&self) {
         let out = Command::new("git")
-            .current_dir(&(self.path.to_owned() + &self.name))
+            .current_dir(format!("{}{}", &self.path, &self.name))
             .arg("commit")
             .status()
             .expect("failed to commit");
@@ -127,7 +127,7 @@ impl GitRepo {
     /// Tries to commit changes with a message argument.
     fn commit_with_msg(&self, msg: &String) {
         let out = Command::new("git")
-            .current_dir(&(self.path.to_owned() + &self.name))
+            .current_dir(format!("{}{}", &self.path, &self.name))
             .arg("commit")
             .arg("-m")
             .arg(msg)
@@ -138,7 +138,7 @@ impl GitRepo {
     /// Attempts to push the repository.
     fn push(&self) {
         let out = Command::new("git")
-            .current_dir(&(self.path.to_owned() + &self.name))
+            .current_dir(format!("{}{}", &self.path, &self.name))
             .arg("push")
             .status()
             .expect("failed to push");
