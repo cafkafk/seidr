@@ -20,7 +20,6 @@ fn main() {
     let args = Args::parse();
     let config = Config::new(&args.config);
     match &args {
-        //args if args.quick == true => config.quick(&args.quick),
         args if args.license == true => unimplemented!(),
         args if args.code_of_conduct == true => unimplemented!(),
         _ => (),
