@@ -46,11 +46,15 @@ pub struct Args {
     #[arg(short, long, default_value_t = home_dir() + CONFIG_FILE)]
     pub config: String,
 
-    /// Print full-text license information
+    /// Print license information
     #[arg(long)]
     pub license: bool,
 
-    /// Print full-text code-of-conduct (not implemented)
+    /// Print warranty information
+    #[arg(long)]
+    pub warranty: bool,
+
+    /// Print code-of-conduct information (not implemented)
     #[arg(long)]
     pub code_of_conduct: bool,
 
