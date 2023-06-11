@@ -16,7 +16,9 @@
 
 use log::{debug, error, info, trace, warn};
 use serde::{Deserialize, Serialize};
+use std::fs::canonicalize;
 use std::os::unix::fs::symlink;
+use std::path::Path;
 use std::{fs, process::Command};
 
 /// Represents the config.toml file.
@@ -43,54 +45,46 @@ pub struct GitRepo {
     pub clone: bool,
 }
 
+fn handle_file_exists(selff: &Links, tx_path: &Path, rx_path: &Path) {
+    match rx_path.read_link() {
+        Ok(file) if file.canonicalize().unwrap() == tx_path.canonicalize().unwrap() => {
+            debug!(
+                "Linking {} -> {} failed: file already linked",
+                &selff.tx, &selff.rx
+            );
+        }
+        Ok(file) => {
+            error!(
+                "Linking {} -> {} failed: link to different file exists",
+                &selff.tx, &selff.rx
+            );
+        }
+        Err(error) => {
+            error!("Linking {} -> {} failed: file exists", &selff.tx, &selff.rx);
+        }
+    }
+}
+
 impl Links {
     /// Creates a link from a file
     fn link(&self) {
-        let rx_exists: bool = std::path::Path::new(&self.rx).exists();
-        let tx_exists: bool = std::path::Path::new(&self.tx).exists();
-        // NOTE If the file exists
-        // NOTE And is not a link
-        // NOTE We avoid using fs::read_link by returning early
-        // FIXME This should be refactored
-        if rx_exists {
-            let rx_link = fs::read_link(&self.rx);
-            match rx_link {
-                Ok(_) => (),
-                Err(error) => {
-                    error!("Linking {} -> {} failed: {}", &self.tx, &self.rx, error);
-                    return;
-                }
-            }
-        }
-        match (tx_exists, rx_exists) {
-            (true, false) => symlink(&self.tx, &self.rx).expect("failed to create link"),
-            (true, true)
-                if fs::read_link(&self.rx)
-                    .expect("failed to read link")
-                    .to_str()
-                    .unwrap()
-                    != &self.tx =>
-            {
+        let tx_path: &Path = std::path::Path::new(&self.tx);
+        let rx_path: &Path = std::path::Path::new(&self.rx);
+        match rx_path.try_exists() {
+            Ok(true) => handle_file_exists(&self, &tx_path, &rx_path),
+            Ok(false) if rx_path.is_symlink() => {
                 error!(
-                    "link {}: can't link rx {}, file already exists",
-                    &self.name, &self.rx
-                )
+                    "Linking {} -> {} failed: broken symlink",
+                    &self.tx, &self.rx
+                );
             }
-            (true, true)
-                if fs::read_link(&self.rx)
-                    .expect("failed to read link")
-                    .to_str()
-                    .unwrap()
-                    == &self.tx =>
-            {
-                warn!(
-                    "link {}: can't link rx {}, file already exists",
-                    &self.name, &self.rx
-                )
+            Ok(false) => {
+                symlink(&self.tx, &self.rx).expect("failed to create link");
             }
-            (false, _) => error!("link {}: could not find tx at {}", &self.name, &self.rx),
-            (_, _) => unreachable!("Should never happen!"),
-        }
+            Err(error) => {
+                error!("Linking {} -> {} failed: {}", &self.tx, &self.rx, error);
+            }
+        };
     }
 }
 
