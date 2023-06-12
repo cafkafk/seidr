@@ -46,7 +46,7 @@ fn main() {
             config.link_all();
         }
         Some(Commands::Quick { msg }) => {
-            config.quick(&msg.as_ref().unwrap());
+            config.quick(&msg.as_ref().get_or_insert(&"gg: quick commit".to_string()));
         }
         Some(Commands::Clone { msg: _ }) => {
             config.clone_all();
