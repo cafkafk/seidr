@@ -36,9 +36,9 @@ fn main() {
     let args = Args::parse();
     let config = Config::new(&args.config);
     match &args {
-        args if args.license == true => println!("{}", utils::strings::INTERACTIVE_LICENSE),
-        args if args.warranty == true => println!("{}", utils::strings::INTERACTIVE_WARRANTY),
-        args if args.code_of_conduct == true => unimplemented!(),
+        args if args.license => println!("{}", utils::strings::INTERACTIVE_LICENSE),
+        args if args.warranty => println!("{}", utils::strings::INTERACTIVE_WARRANTY),
+        args if args.code_of_conduct => unimplemented!(),
         _ => (),
     }
     match &args.command {
@@ -46,7 +46,7 @@ fn main() {
             config.link_all();
         }
         Some(Commands::Quick { msg }) => {
-            config.quick(&msg.as_ref().get_or_insert(&"gg: quick commit".to_string()));
+            config.quick(msg.as_ref().get_or_insert(&"gg: quick commit".to_string()));
         }
         Some(Commands::Clone { msg: _ }) => {
             config.clone_all();
@@ -61,7 +61,7 @@ fn main() {
             config.commit_all();
         }
         Some(Commands::CommitMsg { msg }) => {
-            config.commit_all_msg(&msg.as_ref().unwrap());
+            config.commit_all_msg(msg.as_ref().unwrap());
         }
         None => (),
     }
@@ -116,7 +116,7 @@ mod config {
         let test_path = current_dir() + CONFIG_TEST;
         let mut file = File::create(&test_path).unwrap();
         let contents = serde_yaml::to_string(&config).unwrap();
-        file.write(&contents.as_bytes()).unwrap();
+        file.write_all(contents.as_bytes()).unwrap();
 
         let test_config = Config::new(&test_path);
         assert_eq!(config, test_config);
@@ -127,6 +127,7 @@ mod config {
         let config_path = current_dir() + CONFIG_FILE;
         let config = Config::new(&config_path);
         // FIXME This is unnecessarily terse
+        #[allow(clippy::bool_assert_comparison)]
         {
             assert_eq!(config.repos[0].name, "gg");
             assert_eq!(config.repos[0].path, "/home/ces/.dots/");
@@ -169,6 +170,7 @@ mod repo_actions {
     use std::process::Command;
     use utils::dir::current_dir;
     #[test]
+    #[allow(clippy::redundant_clone)]
     fn test_repo_actions() {
         let test_repo_name: String = "test".to_string();
         let test_repo_dir: String = (current_dir() + "/tst/").to_string();
