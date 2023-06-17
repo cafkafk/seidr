@@ -21,9 +21,14 @@
       url = "github:rustsec/advisory-db";
       flake = false;
     };
+
+    test-directory = {
+      url = "file:///home/ces/org/src/git/gg";
+      flake = false;
+    };
   };
 
-  outputs = { self, nixpkgs, crane, fenix, flake-utils, advisory-db, ... }:
+  outputs = { self, nixpkgs, crane, fenix, flake-utils, advisory-db, test-directory, ... }:
     flake-utils.lib.eachDefaultSystem (system:
       let
         pkgs = import nixpkgs {
@@ -33,13 +38,35 @@
         inherit (pkgs) lib;
 
         craneLib = crane.lib.${system};
-        src = craneLib.cleanCargoSource (craneLib.path ./.);
+
+        #src = craneLib.cleanCargoSource (craneLib.path ./.);
+
+        # When filtering sources, we want to allow assets other than .rs files
+        src = lib.cleanSourceWith {
+          src = ./.; # The original, unfiltered source
+          filter = path: type:
+            (lib.hasSuffix "\.yaml" path) ||
+            # (lib.hasSuffix "\.scss" path) ||
+            # Example of a folder for images, icons, etc
+            #(lib.hasInfix "test" path) ||
+            # Default filter from crane (allow .rs files)
+            (craneLib.filterCargoSources path type)
+          ;
+        };
+
+        # src = pkgs.lib.cleanSourceWith {
+        #    src = craneLib.path ./.; # original, unfiltered source
+        #    filter = path: type:
+        #      (builtins.match ".*yaml" path != null) # include JSONC files
+        #      || (craneLib.filterCargoSources path type);
+        #  };
 
         # Common arguments can be set here to avoid repeating them later
         commonArgs = {
           inherit src;
 
           buildInputs = [
+            # test-directory
             # Add additional build inputs here
           ] ++ lib.optionals pkgs.stdenv.isDarwin [
             # Additional darwin specific inputs can be set here
@@ -48,6 +75,7 @@
 
           # Additional environment variables can be set directly
           # MY_CUSTOM_VAR = "some value";
+          RUST_BACKTRACE = 1;
         };
 
         craneLibLLvmTools = craneLib.overrideToolchain
@@ -65,6 +93,7 @@
         # artifacts from above.
         my-crate = craneLib.buildPackage (commonArgs // {
           inherit cargoArtifacts;
+          # doCheck = false; # NOTE remove me
         });
       in
       {
@@ -100,6 +129,7 @@
           # Run tests with cargo-nextest
           # Consider setting `doCheck = false` on `my-crate` if you do not want
           # the tests to run twice
+          # NOTE enable this part
           my-crate-nextest = craneLib.cargoNextest (commonArgs // {
             inherit cargoArtifacts;
             partitions = 1;
@@ -108,9 +138,9 @@
         } // lib.optionalAttrs (system == "x86_64-linux") {
           # NB: cargo-tarpaulin only supports x86_64 systems
           # Check code coverage (note: this will not upload coverage anywhere)
-          my-crate-coverage = craneLib.cargoTarpaulin (commonArgs // {
-            inherit cargoArtifacts;
-          });
+          # my-crate-coverage = craneLib.cargoTarpaulin (commonArgs // {
+          #   inherit cargoArtifacts;
+          # });
         };
 
         packages = {

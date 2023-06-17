@@ -99,7 +99,7 @@ impl GitRepo {
                 .arg(&self.url)
                 .arg(&self.name)
                 .status()
-                .expect("failed to add");
+                .unwrap_or_else(|_| panic!("git repo failed to add: {:?}", &self,));
             info!("{out}");
         } else {
             info!("{} has clone set to false, not cloned", &self.name);
@@ -111,7 +111,7 @@ impl GitRepo {
             .current_dir(format!("{}{}", &self.path, &self.name))
             .arg("pull")
             .status()
-            .expect("failed to pull");
+            .unwrap_or_else(|_| panic!("git repo failed to pull: {:?}", &self,));
         info!("{out}");
     }
     /// Adds all files in the repository.
@@ -167,9 +167,16 @@ impl Config {
     /// Reads the configuration toml from a path.
     pub fn new(path: &String) -> Self {
         debug!("initializing new Config struct");
-        let yaml = fs::read_to_string(path).expect("Should have been able to read the file");
+        let yaml = fs::read_to_string(path).unwrap_or_else(|_| {
+            panic!("Should have been able to read the file: path -> {:?}", path,)
+        });
         debug!("deserialized yaml from config file");
-        serde_yaml::from_str(&yaml).expect("Should have been able to deserialize yaml config")
+        serde_yaml::from_str(&yaml).unwrap_or_else(|_| {
+            panic!(
+                "Should have been able to deserialize yaml config: path -> {:?}",
+                path,
+            )
+        })
     }
     /// Tries to pull all repositories, skips if fail.
     pub fn pull_all(&self) {
