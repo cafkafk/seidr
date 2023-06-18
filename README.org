@@ -21,9 +21,10 @@ $ ./install
 #+end_src
 
 ** Configuration
-If you want a template, you can copy the file from tst/config.yaml:
+If you want a template, you can copy the file from src/test/config.yaml:
 #+begin_src sh
-$ cp tst/config.yaml ~/.config/gg/config.yaml
+$ mkdir -p ~/.config/gg/
+$ cp src/test/config.yaml ~/.config/gg/config.yaml
 #+end_src
 
 You should *seriously* change this file before running any commands.
