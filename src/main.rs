@@ -76,7 +76,6 @@ mod config {
     use std::env::current_dir;
     use std::fs::File;
     use std::io::prelude::*;
-    //use utils::dir::current_dir;
     #[test]
     fn init_config() {
         let _config = Config {
@@ -178,7 +177,7 @@ mod config {
     }
 }
 
-/* Unable to test with networking inside flake
+/* FIXME Unable to test with networking inside flake
 #[cfg(test)]
 mod repo_actions {
     use crate::*;

@@ -99,7 +99,7 @@ impl GitRepo {
                 .arg(&self.url)
                 .arg(&self.name)
                 .status()
-                .unwrap_or_else(|_| panic!("git repo failed to add: {:?}", &self,));
+                .unwrap_or_else(|_| panic!("git repo failed to clone: {:?}", &self,));
             info!("{out}");
         } else {
             info!("{} has clone set to false, not cloned", &self.name);
@@ -121,7 +121,7 @@ impl GitRepo {
             .arg("add")
             .arg(".")
             .status()
-            .expect("failed to add");
+            .unwrap_or_else(|_| panic!("git repo failed to add: {:?}", &self,));
         info!("{out}");
     }
     /// Tries to commit changes in the repository.
@@ -131,7 +131,7 @@ impl GitRepo {
             .current_dir(format!("{}{}", &self.path, &self.name))
             .arg("commit")
             .status()
-            .expect("failed to commit");
+            .unwrap_or_else(|_| panic!("git repo failed to commit: {:?}", &self,));
         info!("{out}");
     }
     /// Tries to commit changes with a message argument.
@@ -142,7 +142,7 @@ impl GitRepo {
             .arg("-m")
             .arg(msg)
             .status()
-            .expect("failed to commit");
+            .unwrap_or_else(|_| panic!("git repo failed to commit: {:?}", &self,));
         info!("{out}");
     }
     /// Attempts to push the repository.
@@ -151,7 +151,7 @@ impl GitRepo {
             .current_dir(format!("{}{}", &self.path, &self.name))
             .arg("push")
             .status()
-            .expect("failed to push");
+            .unwrap_or_else(|_| panic!("git repo failed to push: {:?}", &self,));
         info!("{out}");
     }
     /// Removes repository
