@@ -41,13 +41,13 @@ pub fn home_dir() -> String {
 /// Changes working directory into a repository.
 ///
 /// WARNING: NOT THREAD SAFE
-fn change_dir_repo(path: &String, name: &String) {
+fn change_dir_repo(path: &str, name: &str) {
     let mut full_path: String = "".to_owned();
     full_path.push_str(path);
     full_path.push_str(name);
     let root = Path::new(&full_path);
     println!("{}", root.display());
-    assert!(env::set_current_dir(&root).is_ok());
+    assert!(env::set_current_dir(root).is_ok());
     debug!(
         "Successfully changed working directory to {}!",
         root.display()
@@ -57,9 +57,9 @@ fn change_dir_repo(path: &String, name: &String) {
 /// Changes working directory to outside of the repo.
 ///
 /// WARNING: NOT THREAD SAFE
-fn change_dir(path: &String) {
+fn change_dir(path: &str) {
     let root = Path::new(path);
-    assert!(env::set_current_dir(&root).is_ok());
+    assert!(env::set_current_dir(root).is_ok());
     debug!(
         "Successfully changed working directory to {}!",
         root.display()

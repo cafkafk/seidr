@@ -71,7 +71,7 @@ impl Links {
         let tx_path: &Path = std::path::Path::new(&self.tx);
         let rx_path: &Path = std::path::Path::new(&self.rx);
         match rx_path.try_exists() {
-            Ok(true) => handle_file_exists(&self, &tx_path, &rx_path),
+            Ok(true) => handle_file_exists(self, tx_path, rx_path),
             Ok(false) if rx_path.is_symlink() => {
                 error!(
                     "Linking {} -> {} failed: broken symlink",
@@ -99,7 +99,7 @@ impl GitRepo {
                 .arg(&self.url)
                 .arg(&self.name)
                 .status()
-                .expect("failed to add");
+                .unwrap_or_else(|_| panic!("git repo failed to clone: {:?}", &self,));
             info!("{out}");
         } else {
             info!("{} has clone set to false, not cloned", &self.name);
@@ -111,7 +111,7 @@ impl GitRepo {
             .current_dir(format!("{}{}", &self.path, &self.name))
             .arg("pull")
             .status()
-            .expect("failed to pull");
+            .unwrap_or_else(|_| panic!("git repo failed to pull: {:?}", &self,));
         info!("{out}");
     }
     /// Adds all files in the repository.
@@ -121,7 +121,7 @@ impl GitRepo {
             .arg("add")
             .arg(".")
             .status()
-            .expect("failed to add");
+            .unwrap_or_else(|_| panic!("git repo failed to add: {:?}", &self,));
         info!("{out}");
     }
     /// Tries to commit changes in the repository.
@@ -131,7 +131,7 @@ impl GitRepo {
             .current_dir(format!("{}{}", &self.path, &self.name))
             .arg("commit")
             .status()
-            .expect("failed to commit");
+            .unwrap_or_else(|_| panic!("git repo failed to commit: {:?}", &self,));
         info!("{out}");
     }
     /// Tries to commit changes with a message argument.
@@ -142,7 +142,7 @@ impl GitRepo {
             .arg("-m")
             .arg(msg)
             .status()
-            .expect("failed to commit");
+            .unwrap_or_else(|_| panic!("git repo failed to commit: {:?}", &self,));
         info!("{out}");
     }
     /// Attempts to push the repository.
@@ -151,7 +151,7 @@ impl GitRepo {
             .current_dir(format!("{}{}", &self.path, &self.name))
             .arg("push")
             .status()
-            .expect("failed to push");
+            .unwrap_or_else(|_| panic!("git repo failed to push: {:?}", &self,));
         info!("{out}");
     }
     /// Removes repository
@@ -167,9 +167,16 @@ impl Config {
     /// Reads the configuration toml from a path.
     pub fn new(path: &String) -> Self {
         debug!("initializing new Config struct");
-        let yaml = fs::read_to_string(path).expect("Should have been able to read the file");
+        let yaml = fs::read_to_string(path).unwrap_or_else(|_| {
+            panic!("Should have been able to read the file: path -> {:?}", path,)
+        });
         debug!("deserialized yaml from config file");
-        serde_yaml::from_str(&yaml).expect("Should have been able to deserialize yaml config")
+        serde_yaml::from_str(&yaml).unwrap_or_else(|_| {
+            panic!(
+                "Should have been able to deserialize yaml config: path -> {:?}",
+                path,
+            )
+        })
     }
     /// Tries to pull all repositories, skips if fail.
     pub fn pull_all(&self) {

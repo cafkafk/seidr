@@ -1,11 +1,10 @@
 [package]
 name = "gg"
-version = "0.0.2"
+version = "0.0.3"
 edition = "2021"
 authors = ["Christina Sørensen <christina@cafkafk.com>"]
 repository = "https://github.com/cafkafk/gg"
 license = "GPL-3.0-only"
-license-file = "LICENSE"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
@@ -16,6 +15,7 @@ clap = { version = "4.0.22", features = ["derive"] }
 log = "0.4"
 #env_logger = "0.9"
 pretty_env_logger = "0.4"
+relative-path = "1.8.0"
 
 [build-dependencies]
 clap = { version = "4.3.2", features = ["derive", "cargo", "env", "help"] }
