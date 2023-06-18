@@ -134,8 +134,7 @@
         "crane": "crane",
         "fenix": "fenix",
         "flake-utils": "flake-utils_2",
-        "nixpkgs": "nixpkgs",
-        "test-directory": "test-directory"
+        "nixpkgs": "nixpkgs"
       }
     },
     "rust-overlay": {
@@ -191,18 +190,6 @@
         "owner": "nix-systems",
         "repo": "default",
         "type": "github"
-      }
-    },
-    "test-directory": {
-      "flake": false,
-      "locked": {
-        "narHash": "sha256-d6xi4mKdjkX2JFicDIv5niSzpyI0m/Hnm8GGAIU04kY=",
-        "type": "file",
-        "url": "file:///home/ces/org/src/git/gg"
-      },
-      "original": {
-        "type": "file",
-        "url": "file:///home/ces/org/src/git/gg"
       }
     }
   },

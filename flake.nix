@@ -21,14 +21,9 @@
       url = "github:rustsec/advisory-db";
       flake = false;
     };
-
-    test-directory = {
-      url = "file:///home/ces/org/src/git/gg";
-      flake = false;
-    };
   };
 
-  outputs = { self, nixpkgs, crane, fenix, flake-utils, advisory-db, test-directory, ... }:
+  outputs = { self, nixpkgs, crane, fenix, flake-utils, advisory-db, ... }:
     flake-utils.lib.eachDefaultSystem (system:
       let
         pkgs = import nixpkgs {
@@ -38,8 +33,6 @@
         inherit (pkgs) lib;
 
         craneLib = crane.lib.${system};
-
-        #src = craneLib.cleanCargoSource (craneLib.path ./.);
 
         # When filtering sources, we want to allow assets other than .rs files
         src = lib.cleanSourceWith {
@@ -53,13 +46,6 @@
             (craneLib.filterCargoSources path type)
           ;
         };
-
-        # src = pkgs.lib.cleanSourceWith {
-        #    src = craneLib.path ./.; # original, unfiltered source
-        #    filter = path: type:
-        #      (builtins.match ".*yaml" path != null) # include JSONC files
-        #      || (craneLib.filterCargoSources path type);
-        #  };
 
         # Common arguments can be set here to avoid repeating them later
         commonArgs = {
@@ -93,7 +79,6 @@
         # artifacts from above.
         my-crate = craneLib.buildPackage (commonArgs // {
           inherit cargoArtifacts;
-          # doCheck = false; # NOTE remove me
         });
       in
       {
@@ -129,7 +114,6 @@
           # Run tests with cargo-nextest
           # Consider setting `doCheck = false` on `my-crate` if you do not want
           # the tests to run twice
-          # NOTE enable this part
           my-crate-nextest = craneLib.cargoNextest (commonArgs // {
             inherit cargoArtifacts;
             partitions = 1;
