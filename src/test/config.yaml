@@ -3,18 +3,22 @@ repos:
     path: /home/ces/.dots/
     url: git@github.com:cafkafk/gg.git
     clone: true
+    push: true
   - name: li
     path: /home/ces/org/src/git/
     url: git@github.com:cafkafk/li.git
     clone: true
+    push: true
   - name: qmk_firmware
     path: /home/ces/org/src/git/
     url: git@github.com:cafkafk/qmk_firmware.git
     clone: true
+    push: true
   - name: starship
     path: /home/ces/org/src/git/
     url: https://github.com/starship/starship.git
     clone: true
+    push: true
 links:
   - name: gg
     rx: /home/ces/.config/gg

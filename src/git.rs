@@ -43,6 +43,7 @@ pub struct GitRepo {
     pub path: String,
     pub url: String,
     pub clone: bool,
+    pub push: bool,
 }
 
 fn handle_file_exists(selff: &Links, tx_path: &Path, rx_path: &Path) {
@@ -147,12 +148,16 @@ impl GitRepo {
     }
     /// Attempts to push the repository.
     fn push(&self) {
-        let out = Command::new("git")
-            .current_dir(format!("{}{}", &self.path, &self.name))
-            .arg("push")
-            .status()
-            .unwrap_or_else(|_| panic!("git repo failed to push: {:?}", &self,));
-        info!("{out}");
+        if self.push {
+            let out = Command::new("git")
+                .current_dir(format!("{}{}", &self.path, &self.name))
+                .arg("push")
+                .status()
+                .unwrap_or_else(|_| panic!("git repo failed to push: {:?}", &self,));
+            info!("{out}");
+        } else {
+            info!("{} has clone set to false, not cloned", &self.name);
+        }
     }
     /// Removes repository
     fn remove(&self) -> Result<(), std::io::Error> {
