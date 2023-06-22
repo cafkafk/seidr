@@ -72,6 +72,7 @@ fn main() {
 mod config {
     use crate::*;
     use git::GitRepo;
+    use git::RepoFlags::{Clone, Push};
     use relative_path::RelativePath;
     use std::env::current_dir;
     use std::fs::File;
@@ -94,8 +95,7 @@ mod config {
                 name: "test repo".to_string(),
                 path: "/tmp".to_string(),
                 url: "https://github.com/cafkafk/gg".to_string(),
-                clone: false,
-                push: false,
+                flags: vec![Clone, Push],
             };
             config.repos.push(repo);
         }
@@ -141,35 +141,33 @@ mod config {
                 .into_string()
                 .unwrap(),
         );
+
+        let flags = vec![Clone, Push];
         // FIXME This is unnecessarily terse
         #[allow(clippy::bool_assert_comparison)]
         {
             assert_eq!(config.repos[0].name, "gg");
             assert_eq!(config.repos[0].path, "/home/ces/.dots/");
             assert_eq!(config.repos[0].url, "git@github.com:cafkafk/gg.git");
-            assert_eq!(config.repos[0].clone, true);
-            assert_eq!(config.repos[0].push, true);
+            assert_eq!(config.repos[0].flags, flags);
             assert_eq!(config.repos[1].name, "li");
             assert_eq!(config.repos[1].path, "/home/ces/org/src/git/");
             assert_eq!(config.repos[1].url, "git@github.com:cafkafk/li.git");
-            assert_eq!(config.repos[1].clone, true);
-            assert_eq!(config.repos[1].push, true);
+            assert_eq!(config.repos[1].flags, flags);
             assert_eq!(config.repos[2].name, "qmk_firmware");
             assert_eq!(config.repos[2].path, "/home/ces/org/src/git/");
             assert_eq!(
                 config.repos[2].url,
                 "git@github.com:cafkafk/qmk_firmware.git"
             );
-            assert_eq!(config.repos[2].clone, true);
-            assert_eq!(config.repos[2].push, true);
+            assert_eq!(config.repos[2].flags, flags);
             assert_eq!(config.repos[3].name, "starship");
             assert_eq!(config.repos[3].path, "/home/ces/org/src/git/");
             assert_eq!(
                 config.repos[3].url,
                 "https://github.com/starship/starship.git"
             );
-            assert_eq!(config.repos[3].clone, true);
-            assert_eq!(config.repos[3].push, true);
+            assert_eq!(config.repos[3].flags, flags);
         }
         {
             assert_eq!(config.links[0].name, "gg");

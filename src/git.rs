@@ -21,6 +21,15 @@ use std::os::unix::fs::symlink;
 use std::path::Path;
 use std::{fs, process::Command};
 
+// why not make it O(log n) instead of a vec that's /only/ O(n)
+// ...because premature optimization is the root of all evil!
+#[derive(PartialOrd, Ord, PartialEq, Eq, Serialize, Deserialize, Debug)]
+pub enum RepoFlags {
+    Push,
+    Clone,
+    // Pull, FIXME: could be interesting to implement
+}
+
 /// Represents the config.toml file.
 #[derive(PartialEq, Debug, Serialize, Deserialize)]
 pub struct Config {
@@ -42,8 +51,7 @@ pub struct GitRepo {
     pub name: String,
     pub path: String,
     pub url: String,
-    pub clone: bool,
-    pub push: bool,
+    pub flags: Vec<RepoFlags>,
 }
 
 fn handle_file_exists(selff: &Links, tx_path: &Path, rx_path: &Path) {
@@ -92,7 +100,7 @@ impl Links {
 impl GitRepo {
     /// Clones the repository to its specified folder.
     fn clone(&self) {
-        if self.clone {
+        if self.flags.contains(&RepoFlags::Clone) {
             // TODO: check if &self.name already exists in dir
             let out = Command::new("git")
                 .current_dir(&self.path)
@@ -117,7 +125,7 @@ impl GitRepo {
     }
     /// Adds all files in the repository.
     fn add_all(&self) {
-        if self.push {
+        if self.flags.contains(&RepoFlags::Push) {
             let out = Command::new("git")
                 .current_dir(format!("{}{}", &self.path, &self.name))
                 .arg("add")
@@ -132,7 +140,7 @@ impl GitRepo {
     /// Tries to commit changes in the repository.
     #[allow(dead_code)]
     fn commit(&self) {
-        if self.push {
+        if self.flags.contains(&RepoFlags::Push) {
             let out = Command::new("git")
                 .current_dir(format!("{}{}", &self.path, &self.name))
                 .arg("commit")
@@ -145,7 +153,7 @@ impl GitRepo {
     }
     /// Tries to commit changes with a message argument.
     fn commit_with_msg(&self, msg: &String) {
-        if self.push {
+        if self.flags.contains(&RepoFlags::Push) {
             let out = Command::new("git")
                 .current_dir(format!("{}{}", &self.path, &self.name))
                 .arg("commit")
@@ -160,7 +168,7 @@ impl GitRepo {
     }
     /// Attempts to push the repository.
     fn push(&self) {
-        if self.push {
+        if self.flags.contains(&RepoFlags::Push) {
             let out = Command::new("git")
                 .current_dir(format!("{}{}", &self.path, &self.name))
                 .arg("push")
