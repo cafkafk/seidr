@@ -117,34 +117,46 @@ impl GitRepo {
     }
     /// Adds all files in the repository.
     fn add_all(&self) {
-        let out = Command::new("git")
-            .current_dir(format!("{}{}", &self.path, &self.name))
-            .arg("add")
-            .arg(".")
-            .status()
-            .unwrap_or_else(|_| panic!("git repo failed to add: {:?}", &self,));
-        info!("{out}");
+        if self.push {
+            let out = Command::new("git")
+                .current_dir(format!("{}{}", &self.path, &self.name))
+                .arg("add")
+                .arg(".")
+                .status()
+                .unwrap_or_else(|_| panic!("git repo failed to add: {:?}", &self,));
+            info!("{out}");
+        } else {
+            info!("{} has clone set to false, not cloned", &self.name);
+        }
     }
     /// Tries to commit changes in the repository.
     #[allow(dead_code)]
     fn commit(&self) {
-        let out = Command::new("git")
-            .current_dir(format!("{}{}", &self.path, &self.name))
-            .arg("commit")
-            .status()
-            .unwrap_or_else(|_| panic!("git repo failed to commit: {:?}", &self,));
-        info!("{out}");
+        if self.push {
+            let out = Command::new("git")
+                .current_dir(format!("{}{}", &self.path, &self.name))
+                .arg("commit")
+                .status()
+                .unwrap_or_else(|_| panic!("git repo failed to commit: {:?}", &self,));
+            info!("{out}");
+        } else {
+            info!("{} has clone set to false, not cloned", &self.name);
+        }
     }
     /// Tries to commit changes with a message argument.
     fn commit_with_msg(&self, msg: &String) {
-        let out = Command::new("git")
-            .current_dir(format!("{}{}", &self.path, &self.name))
-            .arg("commit")
-            .arg("-m")
-            .arg(msg)
-            .status()
-            .unwrap_or_else(|_| panic!("git repo failed to commit: {:?}", &self,));
-        info!("{out}");
+        if self.push {
+            let out = Command::new("git")
+                .current_dir(format!("{}{}", &self.path, &self.name))
+                .arg("commit")
+                .arg("-m")
+                .arg(msg)
+                .status()
+                .unwrap_or_else(|_| panic!("git repo failed to commit: {:?}", &self,));
+            info!("{out}");
+        } else {
+            info!("{} has clone set to false, not cloned", &self.name);
+        }
     }
     /// Attempts to push the repository.
     fn push(&self) {
@@ -163,7 +175,7 @@ impl GitRepo {
     fn remove(&self) -> Result<(), std::io::Error> {
         // https://doc.rust-lang.org/std/fs/fn.remove_dir_all.html
         unimplemented!("This seems to easy to missuse/exploit");
-        fs::remove_dir_all(format!("{}{}", &self.path, &self.name))
+        // fs::remove_dir_all(format!("{}{}", &self.path, &self.name))
     }
 }
 
