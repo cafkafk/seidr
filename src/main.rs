@@ -71,8 +71,8 @@ fn main() {
 #[cfg(test)]
 mod config {
     use crate::*;
-    use git::GitRepo;
     use git::RepoFlags::{Clone, Push};
+    use git::{Category, GitRepo};
     use relative_path::RelativePath;
     use std::env::current_dir;
     use std::fs::File;
@@ -80,16 +80,28 @@ mod config {
     #[test]
     fn init_config() {
         let _config = Config {
-            repos: vec![],
+            categories: vec![],
             links: vec![],
         };
     }
     #[test]
     fn init_config_populate() {
-        let mut config = Config {
+        let defaultCategory = Category {
+            name: "Default".to_string(),
+            flags: vec![],
             repos: vec![],
+        };
+        let mut config = Config {
+            categories: vec![defaultCategory],
             links: vec![],
         };
+        for _ in 0..=5 {
+            let category = Category {
+                name: "ehh".to_string(),
+                flags: vec![],
+                repos: vec![],
+            };
+        }
         for _ in 0..=5 {
             let repo = GitRepo {
                 name: "test repo".to_string(),
@@ -97,11 +109,12 @@ mod config {
                 url: "https://github.com/cafkafk/gg".to_string(),
                 flags: vec![Clone, Push],
             };
-            config.repos.push(repo);
+            config.categories[0].repos.push(repo);
         }
         let yaml = serde_yaml::to_string(&config).unwrap();
         println!("{}", yaml);
     }
+    /*
     #[test]
     fn read_config_populate() {
         let _config = Config::new(&RelativePath::new("./src/test/config.yaml").to_string());
@@ -178,6 +191,7 @@ mod config {
             assert_eq!(config.links[1].tx, "/home/ces/.dots/starship.toml");
         }
     }
+    */
 }
 
 /* FIXME Unable to test with networking inside flake

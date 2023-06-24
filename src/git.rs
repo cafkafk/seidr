@@ -33,8 +33,15 @@ pub enum RepoFlags {
 /// Represents the config.toml file.
 #[derive(PartialEq, Debug, Serialize, Deserialize)]
 pub struct Config {
-    pub repos: Vec<GitRepo>,
+    pub categories: Vec<Category>,
     pub links: Vec<Links>,
+}
+
+#[derive(PartialEq, Debug, Serialize, Deserialize)]
+pub struct Category {
+    pub name: String,
+    pub flags: Vec<RepoFlags>, // FIXME: not implemented
+    pub repos: Vec<GitRepo>,
 }
 
 /// Contain fields for a single link.
@@ -206,47 +213,59 @@ impl Config {
     /// Tries to pull all repositories, skips if fail.
     pub fn pull_all(&self) {
         debug!("exectuting pull_all");
-        for r in self.repos.iter() {
-            r.pull();
+        for category in self.categories.iter() {
+            for repo in category.repos.iter() {
+                repo.pull();
+            }
         }
     }
     /// Tries to clone all repositories, skips if fail.
     pub fn clone_all(&self) {
         debug!("exectuting clone_all");
-        for r in self.repos.iter() {
-            r.clone();
+        for category in self.categories.iter() {
+            for repo in category.repos.iter() {
+                repo.clone();
+            }
         }
     }
     /// Tries to add all work in all repositories, skips if fail.
     pub fn add_all(&self) {
         debug!("exectuting clone_all");
-        for r in self.repos.iter() {
-            r.add_all();
+        for category in self.categories.iter() {
+            for repo in category.repos.iter() {
+                repo.add_all();
+            }
         }
     }
     /// Tries to commit all repositories one at a time, skips if fail.
     pub fn commit_all(&self) {
         debug!("exectuting clone_all");
-        for r in self.repos.iter() {
-            r.commit();
+        for category in self.categories.iter() {
+            for repo in category.repos.iter() {
+                repo.commit();
+            }
         }
     }
     /// Tries to commit all repositories with msg, skips if fail.
     pub fn commit_all_msg(&self, msg: &String) {
         debug!("exectuting clone_all");
-        for r in self.repos.iter() {
-            r.commit_with_msg(msg);
+        for category in self.categories.iter() {
+            for repo in category.repos.iter() {
+                repo.commit_with_msg(msg);
+            }
         }
     }
     /// Tries to pull, add all, commit with msg "quick commit", and push all
     /// repositories, skips if fail.
     pub fn quick(&self, msg: &String) {
         debug!("exectuting quick");
-        for r in self.repos.iter() {
-            r.pull();
-            r.add_all();
-            r.commit_with_msg(msg);
-            r.push();
+        for category in self.categories.iter() {
+            for repo in category.repos.iter() {
+                repo.pull();
+                repo.add_all();
+                repo.commit_with_msg(msg);
+                repo.push();
+            }
         }
     }
 

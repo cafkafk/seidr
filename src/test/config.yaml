@@ -1,20 +1,26 @@
-repos:
-  - name: gg
-    path: /home/ces/.dots/
-    url: git@github.com:cafkafk/gg.git
-    flags: [Clone, Push]
-  - name: li
-    path: /home/ces/org/src/git/
-    url: git@github.com:cafkafk/li.git
-    flags: [Clone, Push]
-  - name: qmk_firmware
-    path: /home/ces/org/src/git/
-    url: git@github.com:cafkafk/qmk_firmware.git
-    flags: [Clone, Push]
-  - name: starship
-    path: /home/ces/org/src/git/
-    url: https://github.com/starship/starship.git
-    flags: [Clone, Push]
+categories:
+  - name: config
+    flags: []
+    repos:
+      - name: qmk_firmware
+        path: /home/ces/org/src/git/
+        url: git@github.com:cafkafk/qmk_firmware.git
+        flags: [Clone, Push]
+      - name: starship
+        path: /home/ces/org/src/git/
+        url: https://github.com/starship/starship.git
+        flags: [Clone, Push]
+  - name: utils
+    flags: []
+    repos:
+      - name: gg
+        path: /home/ces/.dots/
+        url: git@github.com:cafkafk/gg.git
+        flags: [Clone, Push]
+      - name: li
+        path: /home/ces/org/src/git/
+        url: git@github.com:cafkafk/li.git
+        flags: [Clone, Push]
 links:
   - name: gg
     rx: /home/ces/.config/gg
