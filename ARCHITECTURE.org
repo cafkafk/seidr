@@ -1,0 +1,103 @@
+#+title: Architecture
+
+** Architecture
+*** Config datastructure
+
+There were 3 major designs considered so far (here in chronological order).
+
+**** Vec Based
+Code sketch in https://github.com/cafkafk/gg/commit/3d3b6d6646bda84333018cd621cd8bd6348b9cef
+
+#+begin_src mermaid :file config-struct-vec.png :width 4000px
+flowchart LR
+  Co[config]
+  Ca["categories (vec<category>)"]
+  L[links]
+  Co ==> Ca & L
+  Ca ----> c1(category 1) & c2(category 2) & c3(category 3)
+  subgraph Categories Vec
+    c1(category 1) ==> flags1 & repos1("repos (vec<GitRepo>)")
+    c2(category 2) ==> flags2 & repos2("repos (vec<GitRepo>)")
+    c3(category 3) ==> flags3 & repos3("repos (vec<GitRepo>)")
+    direction TB
+    subgraph GitRepos
+      repos1 --> gr1 & gr2 & gr3
+      repos2 --> gr4 & gr5 & gr6
+      repos3 --> gr7 & gr8 & gr9
+    end
+    direction TB
+    subgraph Flags Enum
+      flags1 & flags2 & flags3 -. any of .- Push & Clone
+    end
+  end
+#+end_src
+
+#+RESULTS:
+[[file:config-struct-vec.png]]
+
+**** BTreeMap Based (nested)
+
+#+begin_src mermaid :file config-struct-nested.png :width 4000px
+flowchart LR
+  Co[config]
+  Ca["categories (BTreeMap)"]
+  L[links]
+  Co ==> Ca & L
+  Ca -- "unique_name/key" --> c1(category 1) & c2(category 2) & c3(category 3)
+  subgraph Categories BTreeMap
+    c1(category 1) ==> flags1 & repos1("repos (BTreeMap)")
+    c2(category 2) ==> flags2 & repos2("repos (BTreeMap)")
+    c3(category 3) ==> flags3 & repos3("repos (BTreeMap)")
+    direction TB
+    subgraph GitRepos
+      repos1 -- "unique_name/key" --> gr1 & gr2 & gr3
+      repos2 -- "unique_name/key" --> gr4 & gr5 & gr6
+      repos3 -- "unique_name/key" --> gr7 & gr8 & gr9
+    end
+    direction TB
+    subgraph Flags Enum
+      flags1 & flags2 & flags3 -. any of .- Push & Clone
+    end
+  end
+#+end_src
+
+
+#+RESULTS:
+[[file:config-struct-nested.png]]
+
+**** BTreeMap Based (Store)
+
+#+begin_src mermaid :file config-struct-store.png :width 4000px
+flowchart LR
+  S[(Store)]
+  subgraph Repo Store BMapTree
+    S -- "unique_name/key" ----> gr1 & gr2 & gr3
+    S -- "unique_name/key" ----> gr4 & gr5 & gr6
+    S -- "unique_name/key" ----> gr7 & gr8 & gr9
+  end
+  Co[config]
+  Ca["categories (BTreeMap)"]
+  L[links]
+  Co ==> Ca & L
+  Ca -- "unique_name/key" --> c1(category 1) & c2(category 2) & c3(category 3)
+  subgraph Categories BTreeMap
+    c1(category 1) ==> flags1 & repos1("repos (vec<keys>)")
+    c2(category 2) ==> flags2 & repos2("repos (vec<keys>)")
+    c3(category 3) ==> flags3 & repos3("repos (vec<keys>)")
+    direction TB
+    subgraph GitRepos
+      repos1 <-. "unique_name/key" .-> gr1 & gr2 & gr3 & gr4 & gr5 & gr6 & gr7 & gr8 & gr9
+      repos2 <-. "unique_name/key" .-> gr1 & gr2 & gr3 & gr4 & gr5 & gr6 & gr7 & gr8 & gr9
+      repos3 <-. "unique_name/key" .-> gr1 & gr2 & gr3 & gr4 & gr5 & gr6 & gr7 & gr8 & gr9
+    end
+    direction TB
+    subgraph Flags Enum
+      flags1 & flags2 & flags3 -. any of .- Push & Clone
+    end
+  end
+#+end_src
+
+#+RESULTS:
+[[file:config-struct-store.png]]
+
+**** Discussion
