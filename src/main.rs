@@ -74,42 +74,57 @@ mod config {
     use git::RepoFlags::{Clone, Push};
     use git::{Category, GitRepo};
     use relative_path::RelativePath;
+    use std::collections::HashMap;
     use std::env::current_dir;
     use std::fs::File;
     use std::io::prelude::*;
     #[test]
     fn init_config() {
         let _config = Config {
-            categories: vec![],
+            categories: HashMap::new(),
             links: vec![],
         };
     }
     #[test]
     fn init_config_populate() {
         let defaultCategory = Category {
-            name: "Default".to_string(),
             flags: vec![],
-            repos: vec![],
+            repos: HashMap::new(),
         };
         let mut config = Config {
-            categories: vec![defaultCategory],
+            categories: HashMap::new(),
             links: vec![],
         };
         for _ in 0..=5 {
             let category = Category {
-                name: "ehh".to_string(),
                 flags: vec![],
-                repos: vec![],
+                repos: HashMap::new(),
             };
         }
-        for _ in 0..=5 {
-            let repo = GitRepo {
-                name: "test repo".to_string(),
-                path: "/tmp".to_string(),
-                url: "https://github.com/cafkafk/gg".to_string(),
-                flags: vec![Clone, Push],
-            };
-            config.categories[0].repos.push(repo);
+        config
+            .categories
+            .insert(format!("{}", 0).to_string(), defaultCategory);
+        for i in 0..=5 {
+            config
+                .categories
+                .get_mut(&format!("{}", 0).to_string())
+                .expect("category not found")
+                .repos
+                .insert(
+                    format!("{}", i).to_string(),
+                    GitRepo {
+                        name: "test repo".to_string(),
+                        path: "/tmp".to_string(),
+                        url: "https://github.com/cafkafk/gg".to_string(),
+                        flags: vec![Clone, Push],
+                    },
+                );
+            // let repo = GitRepo {
+            //     name: "test repo".to_string(),
+            //     path: "/tmp".to_string(),
+            //     url: "https://github.com/cafkafk/gg".to_string(),
+            //     flags: vec![Clone, Push],
+            // };
         }
         let yaml = serde_yaml::to_string(&config).unwrap();
         println!("{}", yaml);

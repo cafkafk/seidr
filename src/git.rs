@@ -16,6 +16,7 @@
 
 use log::{debug, error, info, trace, warn};
 use serde::{Deserialize, Serialize};
+use std::collections::HashMap;
 use std::fs::canonicalize;
 use std::os::unix::fs::symlink;
 use std::path::Path;
@@ -33,15 +34,20 @@ pub enum RepoFlags {
 /// Represents the config.toml file.
 #[derive(PartialEq, Debug, Serialize, Deserialize)]
 pub struct Config {
-    pub categories: Vec<Category>,
+    /// map of all categories
+    ///
+    /// Key should conceptually be seen as the name of the category.
+    pub categories: HashMap<String, Category>,
     pub links: Vec<Links>,
 }
 
 #[derive(PartialEq, Debug, Serialize, Deserialize)]
 pub struct Category {
-    pub name: String,
     pub flags: Vec<RepoFlags>, // FIXME: not implemented
-    pub repos: Vec<GitRepo>,
+    /// map of all categories
+    ///
+    /// Key should conceptually be seen as the name of the category.
+    pub repos: HashMap<String, GitRepo>,
 }
 
 /// Contain fields for a single link.
@@ -211,12 +217,15 @@ impl Config {
         })
     }
     /// Runs associated function on all repos in config
+    ///
+    /// TODO: need to be made over a generic repo type
     fn on_all<F>(&self, f: F)
     where
         F: Fn(&GitRepo),
     {
-        for category in self.categories.iter() {
-            for repo in category.repos.iter() {
+        for (_, category) in self.categories.iter() {
+            println!("{category:?}");
+            for (_, repo) in category.repos.iter() {
                 f(repo);
             }
         }
@@ -224,11 +233,9 @@ impl Config {
     /// Tries to pull all repositories, skips if fail.
     pub fn pull_all(&self) {
         debug!("exectuting pull_all");
-        for category in self.categories.iter() {
-            for repo in category.repos.iter() {
-                repo.pull();
-            }
-        }
+        self.on_all(|repo| {
+            repo.pull();
+        });
     }
     /// Tries to clone all repositories, skips if fail.
     pub fn clone_all(&self) {

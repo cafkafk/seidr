@@ -1,23 +1,23 @@
 categories:
-  - name: config
+  config:
     flags: []
     repos:
-      - name: qmk_firmware
+      qmk_firmware:
         path: /home/ces/org/src/git/
         url: git@github.com:cafkafk/qmk_firmware.git
         flags: [Clone, Push]
-      - name: starship
+      starship:
         path: /home/ces/org/src/git/
         url: https://github.com/starship/starship.git
         flags: [Clone, Push]
-  - name: utils
+  utils:
     flags: []
     repos:
-      - name: gg
+      gg:
         path: /home/ces/.dots/
         url: git@github.com:cafkafk/gg.git
         flags: [Clone, Push]
-      - name: li
+      li:
         path: /home/ces/org/src/git/
         url: git@github.com:cafkafk/li.git
         flags: [Clone, Push]
