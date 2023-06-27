@@ -33,7 +33,7 @@ flowchart LR
 #+end_src
 
 #+RESULTS:
-[[file:config-struct-vec.png]]
+[[file:./doc/img/config-struct-vec.png]]
 
 **** BTreeMap Based (nested)
 
@@ -63,7 +63,7 @@ flowchart LR
 
 
 #+RESULTS:
-[[file:config-struct-nested.png]]
+[[file:./doc/img/config-struct-nested.png]]
 
 **** BTreeMap Based (Store)
 
@@ -98,6 +98,6 @@ flowchart LR
 #+end_src
 
 #+RESULTS:
-[[file:config-struct-store.png]]
+[[file:./doc/img/config-struct-store.png]]
 
 **** Discussion
