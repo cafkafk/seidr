@@ -8,7 +8,7 @@ There were 3 major designs considered so far (here in chronological order).
 **** Vec Based
 Code sketch in https://github.com/cafkafk/gg/commit/3d3b6d6646bda84333018cd621cd8bd6348b9cef
 
-#+begin_src mermaid :file config-struct-vec.png :width 4000px
+#+begin_src mermaid :file ./doc/img/config-struct-vec.png :width 4000px
 flowchart LR
   Co[config]
   Ca["categories (vec<category>)"]
@@ -37,7 +37,7 @@ flowchart LR
 
 **** BTreeMap Based (nested)
 
-#+begin_src mermaid :file config-struct-nested.png :width 4000px
+#+begin_src mermaid :file ./doc/img/config-struct-nested.png :width 4000px
 flowchart LR
   Co[config]
   Ca["categories (BTreeMap)"]
@@ -67,7 +67,7 @@ flowchart LR
 
 **** BTreeMap Based (Store)
 
-#+begin_src mermaid :file config-struct-store.png :width 4000px
+#+begin_src mermaid :file ./doc/img/config-struct-store.png :width 4000px
 flowchart LR
   S[(Store)]
   subgraph Repo Store BMapTree
