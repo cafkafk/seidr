@@ -87,7 +87,7 @@ mod config {
     }
     #[test]
     fn init_config_populate() {
-        let defaultCategory = Category {
+        let default_category = Category {
             flags: vec![],
             repos: HashMap::new(),
         };
@@ -95,15 +95,9 @@ mod config {
             categories: HashMap::new(),
             links: vec![],
         };
-        for _ in 0..=5 {
-            let category = Category {
-                flags: vec![],
-                repos: HashMap::new(),
-            };
-        }
         config
             .categories
-            .insert(format!("{}", 0).to_string(), defaultCategory);
+            .insert(format!("{}", 0).to_string(), default_category);
         for i in 0..=5 {
             config
                 .categories
@@ -119,17 +113,10 @@ mod config {
                         flags: vec![Clone, Push],
                     },
                 );
-            // let repo = GitRepo {
-            //     name: "test repo".to_string(),
-            //     path: "/tmp".to_string(),
-            //     url: "https://github.com/cafkafk/gg".to_string(),
-            //     flags: vec![Clone, Push],
-            // };
         }
-        let yaml = serde_yaml::to_string(&config).unwrap();
-        println!("{}", yaml);
+        // let yaml = serde_yaml::to_string(&config).unwrap();
+        // println!("{}", yaml);
     }
-    /*
     #[test]
     fn read_config_populate() {
         let _config = Config::new(&RelativePath::new("./src/test/config.yaml").to_string());
@@ -159,8 +146,23 @@ mod config {
         let test_config = Config::new(&RelativePath::new("./src/test/test.yaml").to_string());
         assert_eq!(config, test_config);
     }
+    fn get_category<'cat>(config: &'cat Config, name: &'cat str) -> &'cat Category {
+        config.categories.get(name).expect("failed to get category")
+    }
+    fn get_repo<F>(config: &Config, cat_name: &str, repo_name: &str, f: F)
+    where
+        F: FnOnce(&GitRepo),
+    {
+        f(config
+            .categories
+            .get(cat_name)
+            .expect("failed to get category")
+            .repos
+            .get(repo_name)
+            .expect("failed to get category"))
+    }
     #[test]
-    fn read_and_verify_config() {
+    fn is_config_readable() {
         let root = current_dir().unwrap();
         let config = Config::new(
             &RelativePath::new("./src/test/config.yaml")
@@ -171,31 +173,14 @@ mod config {
         );
 
         let flags = vec![Clone, Push];
-        // FIXME This is unnecessarily terse
+        // FIXME not very extensive
         #[allow(clippy::bool_assert_comparison)]
         {
-            assert_eq!(config.repos[0].name, "gg");
-            assert_eq!(config.repos[0].path, "/home/ces/.dots/");
-            assert_eq!(config.repos[0].url, "git@github.com:cafkafk/gg.git");
-            assert_eq!(config.repos[0].flags, flags);
-            assert_eq!(config.repos[1].name, "li");
-            assert_eq!(config.repos[1].path, "/home/ces/org/src/git/");
-            assert_eq!(config.repos[1].url, "git@github.com:cafkafk/li.git");
-            assert_eq!(config.repos[1].flags, flags);
-            assert_eq!(config.repos[2].name, "qmk_firmware");
-            assert_eq!(config.repos[2].path, "/home/ces/org/src/git/");
-            assert_eq!(
-                config.repos[2].url,
-                "git@github.com:cafkafk/qmk_firmware.git"
-            );
-            assert_eq!(config.repos[2].flags, flags);
-            assert_eq!(config.repos[3].name, "starship");
-            assert_eq!(config.repos[3].path, "/home/ces/org/src/git/");
-            assert_eq!(
-                config.repos[3].url,
-                "https://github.com/starship/starship.git"
-            );
-            assert_eq!(config.repos[3].flags, flags);
+            get_repo(&config, "config", "qmk_firmware", |repo| {
+                assert_eq!(repo.name, "qmk_firmware");
+                assert_eq!(repo.path, "/home/ces/org/src/git/");
+                assert_eq!(repo.url, "git@github.com:cafkafk/qmk_firmware.git");
+            })
         }
         {
             assert_eq!(config.links[0].name, "gg");
@@ -204,9 +189,9 @@ mod config {
             assert_eq!(config.links[1].name, "starship");
             assert_eq!(config.links[1].rx, "/home/ces/.config/starship.toml");
             assert_eq!(config.links[1].tx, "/home/ces/.dots/starship.toml");
+            // FIXME doesn't check repoflags
         }
     }
-    */
 }
 
 /* FIXME Unable to test with networking inside flake
