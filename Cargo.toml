@@ -16,6 +16,7 @@ log = "0.4"
 #env_logger = "0.9"
 pretty_env_logger = "0.4"
 relative-path = "1.8.0"
+spinners = "4.1.0"
 
 [build-dependencies]
 clap = { version = "4.3.2", features = ["derive", "cargo", "env", "help"] }

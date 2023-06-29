@@ -16,6 +16,7 @@
 
 use log::{debug, error, info, trace, warn};
 use serde::{Deserialize, Serialize};
+use spinners::{Spinner, Spinners};
 use std::collections::HashMap;
 use std::fs::canonicalize;
 use std::os::unix::fs::symlink;
@@ -24,6 +25,9 @@ use std::{fs, process::Command};
 
 // why not make it O(log n) instead of a vec that's /only/ O(n)
 // ...because premature optimization is the root of all evil!
+//
+// it's time
+
 #[derive(PartialOrd, Ord, PartialEq, Eq, Serialize, Deserialize, Debug)]
 pub enum RepoFlags {
     Push,
@@ -41,6 +45,9 @@ pub struct Config {
     pub links: Vec<Links>,
 }
 
+/// Represents a category of repositories
+///
+/// This allows you to organize your repositories into categories
 #[derive(PartialEq, Debug, Serialize, Deserialize)]
 pub struct Category {
     pub flags: Vec<RepoFlags>, // FIXME: not implemented
@@ -120,9 +127,9 @@ impl GitRepo {
                 .arg("clone")
                 .arg(&self.url)
                 .arg(&self.name)
-                .status()
+                .output()
                 .unwrap_or_else(|_| panic!("git repo failed to clone: {:?}", &self,));
-            info!("{out}");
+            // info!("{out}");
         } else {
             info!("{} has clone set to false, not cloned", &self.name);
         }
@@ -132,9 +139,9 @@ impl GitRepo {
         let out = Command::new("git")
             .current_dir(format!("{}{}", &self.path, &self.name))
             .arg("pull")
-            .status()
+            .output()
             .unwrap_or_else(|_| panic!("git repo failed to pull: {:?}", &self,));
-        info!("{out}");
+        // info!("{out}");
     }
     /// Adds all files in the repository.
     fn add_all(&self) {
@@ -143,9 +150,9 @@ impl GitRepo {
                 .current_dir(format!("{}{}", &self.path, &self.name))
                 .arg("add")
                 .arg(".")
-                .status()
+                .output()
                 .unwrap_or_else(|_| panic!("git repo failed to add: {:?}", &self,));
-            info!("{out}");
+            // info!("{out}");
         } else {
             info!("{} has clone set to false, not cloned", &self.name);
         }
@@ -157,9 +164,9 @@ impl GitRepo {
             let out = Command::new("git")
                 .current_dir(format!("{}{}", &self.path, &self.name))
                 .arg("commit")
-                .status()
+                .output()
                 .unwrap_or_else(|_| panic!("git repo failed to commit: {:?}", &self,));
-            info!("{out}");
+            // info!("{out}");
         } else {
             info!("{} has clone set to false, not cloned", &self.name);
         }
@@ -172,9 +179,9 @@ impl GitRepo {
                 .arg("commit")
                 .arg("-m")
                 .arg(msg)
-                .status()
+                .output()
                 .unwrap_or_else(|_| panic!("git repo failed to commit: {:?}", &self,));
-            info!("{out}");
+            // info!("{out}");
         } else {
             info!("{} has clone set to false, not cloned", &self.name);
         }
@@ -185,9 +192,9 @@ impl GitRepo {
             let out = Command::new("git")
                 .current_dir(format!("{}{}", &self.path, &self.name))
                 .arg("push")
-                .status()
+                .output()
                 .unwrap_or_else(|_| panic!("git repo failed to push: {:?}", &self,));
-            info!("{out}");
+            // info!("{out}");
         } else {
             info!("{} has clone set to false, not cloned", &self.name);
         }
@@ -224,7 +231,6 @@ impl Config {
         F: Fn(&GitRepo),
     {
         for (_, category) in self.categories.iter() {
-            println!("{category:?}");
             for (_, repo) in category.repos.iter() {
                 f(repo);
             }
@@ -270,10 +276,15 @@ impl Config {
     pub fn quick(&self, msg: &String) {
         debug!("exectuting quick");
         self.on_all(|repo| {
+            let mut sp = Spinner::new(Spinners::Dots10, format!("{}: pull", repo.name).into());
             repo.pull();
+            sp = Spinner::new(Spinners::Dots10, format!("{}: add_all", repo.name).into());
             repo.add_all();
+            sp = Spinner::new(Spinners::Dots10, format!("{}: commit", repo.name).into());
             repo.commit_with_msg(msg);
+            sp = Spinner::new(Spinners::Dots10, format!("{}: push", repo.name).into());
             repo.push();
+            sp.stop_and_persist("✔", format!("{}: quick", repo.name).into());
         });
     }
 
