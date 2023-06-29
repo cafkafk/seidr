@@ -236,38 +236,51 @@ impl Config {
             }
         }
     }
+    fn on_all_spinner<F>(&self, op: &str, f: F)
+    where
+        F: Fn(&GitRepo),
+    {
+        for (_, category) in self.categories.iter() {
+            for (_, repo) in category.repos.iter() {
+                let mut sp =
+                    Spinner::new(Spinners::Dots10, format!("{}: {}", repo.name, op).into());
+                f(repo);
+                sp.stop_and_persist("✔", format!("{}: {}", repo.name, op).into());
+            }
+        }
+    }
     /// Tries to pull all repositories, skips if fail.
     pub fn pull_all(&self) {
         debug!("exectuting pull_all");
-        self.on_all(|repo| {
+        self.on_all_spinner("pull", |repo| {
             repo.pull();
         });
     }
     /// Tries to clone all repositories, skips if fail.
     pub fn clone_all(&self) {
         debug!("exectuting clone_all");
-        self.on_all(|repo| {
+        self.on_all_spinner("clone", |repo| {
             repo.clone();
         });
     }
     /// Tries to add all work in all repositories, skips if fail.
     pub fn add_all(&self) {
         debug!("exectuting clone_all");
-        self.on_all(|repo| {
+        self.on_all_spinner("add", |repo| {
             repo.add_all();
         });
     }
     /// Tries to commit all repositories one at a time, skips if fail.
     pub fn commit_all(&self) {
         debug!("exectuting clone_all");
-        self.on_all(|repo| {
+        self.on_all_spinner("commit", |repo| {
             repo.commit();
         });
     }
     /// Tries to commit all repositories with msg, skips if fail.
     pub fn commit_all_msg(&self, msg: &String) {
         debug!("exectuting clone_all");
-        self.on_all(|repo| {
+        self.on_all_spinner("commit", |repo| {
             repo.commit_with_msg(msg);
         });
     }
