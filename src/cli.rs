@@ -77,6 +77,10 @@ pub enum Commands {
     #[command(visible_alias = "q")]
     Quick { msg: Option<String> },
 
+    /// Do fast pull-commit-push with msg for commit, skipping repo on failure
+    #[command(visible_alias = "f")]
+    Fast { msg: Option<String> },
+
     /// Clone all repositories
     #[command(visible_alias = "c")]
     Clone { msg: Option<String> },

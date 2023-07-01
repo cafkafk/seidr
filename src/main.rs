@@ -70,6 +70,9 @@ fn main() {
         Some(Commands::Quick { msg }) => {
             config.quick(msg.as_ref().get_or_insert(&"gg: quick commit".to_string()));
         }
+        Some(Commands::Fast { msg }) => {
+            config.fast(msg.as_ref().get_or_insert(&"gg: fast commit".to_string()));
+        }
         Some(Commands::Clone { msg: _ }) => {
             config.clone_all();
         }

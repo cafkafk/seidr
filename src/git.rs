@@ -81,6 +81,22 @@ pub struct GitRepo {
     pub flags: Vec<RepoFlags>,
 }
 
+////////////////////////////////////
+////////////////////////////////////
+////////////////////////////////////
+
+/// Represents a single operation on a repository
+struct SeriesItem<'series> {
+    /// The string to be displayed to the user
+    operation: &'series str,
+    /// The closure representing the actual operation
+    closure: Box<dyn Fn(&GitRepo) -> (bool)>,
+}
+
+////////////////////////////////////
+////////////////////////////////////
+////////////////////////////////////
+
 fn handle_file_exists(selff: &Links, tx_path: &Path, rx_path: &Path) {
     match rx_path.read_link() {
         Ok(file) if file.canonicalize().unwrap() == tx_path.canonicalize().unwrap() => {
@@ -102,8 +118,8 @@ fn handle_file_exists(selff: &Links, tx_path: &Path, rx_path: &Path) {
 }
 
 impl Links {
-    /// Creates a link from a file
-    fn link(&self) {
+    /// Creates the link from the link struct
+    pub fn link(&self) {
         let tx_path: &Path = std::path::Path::new(&self.tx);
         let rx_path: &Path = std::path::Path::new(&self.rx);
         match rx_path.try_exists() {
@@ -216,7 +232,9 @@ impl GitRepo {
             false
         }
     }
-    /// Removes repository
+    /// Removes a repository (not implemented)
+    ///
+    /// Kept here as a reminder that we probably shouldn't do this
     fn remove(&self) -> Result<(), std::io::Error> {
         // https://doc.rust-lang.org/std/fs/fn.remove_dir_all.html
         unimplemented!("This seems to easy to missuse/exploit");
@@ -224,14 +242,9 @@ impl GitRepo {
     }
 }
 
-struct SeriesItem<'series> {
-    operation: &'series str,
-    closure: Box<dyn Fn(&GitRepo) -> (bool)>,
-}
-
 impl Config {
     /* GIT RELATED */
-    /// Reads the configuration toml from a path.
+    /// Loads the configuration toml from a path in to the Config struct.
     pub fn new(path: &String) -> Self {
         debug!("initializing new Config struct");
         let yaml = fs::read_to_string(path).unwrap_or_else(|_| {
@@ -245,6 +258,9 @@ impl Config {
             )
         })
     }
+    //////////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////////
     /// Runs associated function on all repos in config
     ///
     /// TODO: need to be made over a generic repo type
@@ -285,8 +301,6 @@ impl Config {
     /// Runs associated function on all repos in config
     ///
     /// TODO: need to be made over a generic repo type
-    ///
-    /// NOTE: currently unused
     ///
     /// # Current Problem
     ///
@@ -343,6 +357,55 @@ impl Config {
             }
         }
     }
+    /// Runs associated function on all repos in config
+    ///
+    /// Unlike `series_on_all`, this does not stop if it encounters an error
+    ///
+    /// # Usage
+    ///
+    /// Here is an example of how an associated method could use this function.
+    ///
+    /// ```
+    /// let series: Vec<SeriesItem> = vec![
+    ///     SeriesItem {
+    ///         operation: "pull",
+    ///         closure: Box::new(move |repo: &GitRepo| repo.pull()),
+    ///     },
+    ///     SeriesItem {
+    ///         operation: "add",
+    ///         closure: Box::new(move |repo: &GitRepo| repo.add_all()),
+    ///     },
+    ///     SeriesItem {
+    ///         operation: "commit",
+    ///         closure: Box::new(move |repo: &GitRepo| repo.commit()),
+    ///     },
+    ///     SeriesItem {
+    ///         operation: "push",
+    ///         closure: Box::new(move |repo: &GitRepo| repo.push()),
+    ///     },
+    /// ];
+    /// self.all_on_all(series);
+    /// ```
+    pub fn all_on_all(&self, closures: Vec<SeriesItem>) {
+        for (_, category) in self.categories.iter() {
+            for (_, repo) in category.repos.iter() {
+                for instruction in closures.iter() {
+                    let f = &instruction.closure;
+                    let op = instruction.operation;
+                    let mut sp =
+                        Spinner::new(Spinners::Dots10, format!("{}: {}", repo.name, op).into());
+                    if f(repo) {
+                        sp.stop_and_persist("✔", format!("{}: {}", repo.name, op).into());
+                    } else {
+                        sp.stop_and_persist("❎", format!("{}: {}", repo.name, op).into());
+                    }
+                }
+            }
+        }
+    }
+    //////////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////////
     /// Tries to pull all repositories, skips if fail.
     pub fn pull_all(&self) {
         debug!("exectuting pull_all");
@@ -370,6 +433,8 @@ impl Config {
     }
     /// Tries to pull, add all, commit with msg "quick commit", and push all
     /// repositories, skips if fail.
+    ///
+    /// FIXME currently msg isn't used
     pub fn quick(&self, msg: &String) {
         debug!("exectuting quick");
         let series: Vec<SeriesItem> = vec![
@@ -390,10 +455,37 @@ impl Config {
                 closure: Box::new(move |repo: &GitRepo| repo.push()),
             },
         ];
+        self.all_on_all(series);
+    }
+    /// Tries to pull, add all, commit with msg "quick commit", and push all
+    /// repositories, skips if fail.
+    ///
+    /// FIXME currently msg isn't used
+    pub fn fast(&self, msg: &String) {
+        debug!("exectuting fast");
+        let series: Vec<SeriesItem> = vec![
+            SeriesItem {
+                operation: "pull",
+                closure: Box::new(move |repo: &GitRepo| repo.pull()),
+            },
+            SeriesItem {
+                operation: "add",
+                closure: Box::new(move |repo: &GitRepo| repo.add_all()),
+            },
+            SeriesItem {
+                operation: "commit",
+                closure: Box::new(move |repo: &GitRepo| repo.commit()),
+            }, // FIXME doesn't take msg
+            SeriesItem {
+                operation: "push",
+                closure: Box::new(move |repo: &GitRepo| repo.push()),
+            },
+        ];
         self.series_on_all(series);
     }
-
-    /* LINK RELATED */
+    //////////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////////
     /// Tries to link all repositories, skips if fail.
     pub fn link_all(&self) {
         debug!("exectuting link_all");
