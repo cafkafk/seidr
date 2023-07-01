@@ -13,6 +13,11 @@
 //
 //    You should have received a copy of the GNU General Public License
 //    along with this program.  If not, see https://www.gnu.org/gpl-3.0.html.
+//
+//! Module for chunk of text
+//!
+//! Ideally, at a VERY long term scale, this should be a nice pattern for
+//! possible translations.
 
 /// Contains the notice for interactive programs from the GPLv3's "How to Apply
 /// These Terms to Your New Programs"

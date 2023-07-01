@@ -13,6 +13,8 @@
 //
 //    You should have received a copy of the GNU General Public License
 //    along with this program.  If not, see https://www.gnu.org/gpl-3.0.html.
+//
+//! Git repositories
 
 use log::{debug, error, info, trace, warn};
 use serde::{Deserialize, Serialize};
@@ -23,25 +25,29 @@ use std::os::unix::fs::symlink;
 use std::path::Path;
 use std::{fs, process::Command};
 
-// why not make it O(log n) instead of a vec that's /only/ O(n)
-// ...because premature optimization is the root of all evil!
-//
-// it's time
-
+/// An enum containing flags that change behaviour of repos and categories
 #[derive(PartialOrd, Ord, PartialEq, Eq, Serialize, Deserialize, Debug)]
 pub enum RepoFlags {
+    /// If push is set, the repository should respond to the push subcommand
     Push,
+    /// If clone is set, the repository should respond to the clone subcommand
     Clone,
+    /// If pull is set, the repository should respond to the pull subcommand
     Pull,
 }
 
 /// Represents the config.toml file.
+///
+/// For diagrams of the underlying architecture, consult ARCHITECHTURE.md
+///
+///
 #[derive(PartialEq, Debug, Serialize, Deserialize)]
 pub struct Config {
     /// map of all categories
     ///
     /// Key should conceptually be seen as the name of the category.
     pub categories: HashMap<String, Category>,
+    /// A vector containing links
     pub links: Vec<Links>,
 }
 
@@ -60,6 +66,7 @@ pub struct Category {
 /// Contain fields for a single link.
 #[derive(PartialEq, Debug, Serialize, Deserialize)]
 pub struct Links {
+    /// The name of the link
     pub name: String,
     pub rx: String,
     pub tx: String,
@@ -254,6 +261,11 @@ impl Config {
             }
         }
     }
+    /// Runs associated function on all repos in config
+    ///
+    /// TODO: need to be made over a generic repo type
+    ///
+    ///
     fn on_all_spinner<F>(&self, op: &str, f: F)
     where
         F: Fn(&GitRepo) -> bool,
@@ -287,7 +299,33 @@ impl Config {
     /// However, at 6:24, we're so ready! Let's go!
     ///
     /// Fun fact: only the last element of a tuple must have a dynamically typed size
-    fn series_on_all(&self, closures: Vec<SeriesItem>) {
+    ///
+    /// # Usage
+    ///
+    /// Here is an example of how an associated method could use this function.
+    ///
+    /// ```
+    /// let series: Vec<SeriesItem> = vec![
+    ///     SeriesItem {
+    ///         operation: "pull",
+    ///         closure: Box::new(move |repo: &GitRepo| repo.pull()),
+    ///     },
+    ///     SeriesItem {
+    ///         operation: "add",
+    ///         closure: Box::new(move |repo: &GitRepo| repo.add_all()),
+    ///     },
+    ///     SeriesItem {
+    ///         operation: "commit",
+    ///         closure: Box::new(move |repo: &GitRepo| repo.commit()),
+    ///     },
+    ///     SeriesItem {
+    ///         operation: "push",
+    ///         closure: Box::new(move |repo: &GitRepo| repo.push()),
+    ///     },
+    /// ];
+    /// self.series_on_all(series);
+    /// ```
+    pub fn series_on_all(&self, closures: Vec<SeriesItem>) {
         for (_, category) in self.categories.iter() {
             for (_, repo) in category.repos.iter() {
                 for instruction in closures.iter() {
@@ -353,10 +391,6 @@ impl Config {
             },
         ];
         self.series_on_all(series);
-        // self.on_all_spinner("pull", |repo| repo.pull());
-        // self.on_all_spinner("add", |repo| repo.add_all());
-        // self.on_all_spinner("commit", |repo| repo.commit_with_msg(msg));
-        // self.on_all_spinner("push", |repo| repo.push());
     }
 
     /* LINK RELATED */

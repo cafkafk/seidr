@@ -13,6 +13,8 @@
 //
 //    You should have received a copy of the GNU General Public License
 //    along with this program.  If not, see https://www.gnu.org/gpl-3.0.html.
+//
+//! Nice helpers for dealing with filesystem environment.
 
 #![feature(stmt_expr_attributes)]
 use log::{debug, error, info, trace, warn};
@@ -20,6 +22,9 @@ use log::{debug, error, info, trace, warn};
 use std::env;
 use std::path::Path;
 
+/// Returns the users current dir
+///
+/// Does not work on Windows
 pub fn current_dir() -> String {
     #[allow(deprecated)] // NOTE we don't care about windows , we don't support it
     env::current_dir()
@@ -29,6 +34,9 @@ pub fn current_dir() -> String {
         .expect("Failed to turn home_dir into a valid string")
 }
 
+/// Returns the users home dir
+///
+/// Does not work on Windows
 pub fn home_dir() -> String {
     #[allow(deprecated)] // NOTE we don't care about windows , we don't support it
     env::home_dir()

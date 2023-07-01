@@ -13,6 +13,22 @@
 //
 //    You should have received a copy of the GNU General Public License
 //    along with this program.  If not, see https://www.gnu.org/gpl-3.0.html.
+//
+//! A Rust GitOps/symlinkfarm orchestrator inspired by GNU Stow.
+//!
+//! # What is?
+//!
+//! A Rust GitOps/symlinkfarm orchestrator inspired by GNU Stow. Useful for dealing
+//! with "dotfiles", and with git support as a first class feature. Configuration is
+//! done throug a single yaml file, giving it a paradigm that should bring joy to
+//! those that use declarative operating systems and package managers.
+//!
+//! Although this isn't really a case where it matters *that* much for performance,
+//! being written in rust instead of e.g. /janky/ scripting languages does also mean
+//! it is snappy and reliable, and the /extensive/ testing helps ensure regressions
+//! aren't introduced.
+//!
+//! That said, we're in 0.0.Z, *here be dragons* for now.
 #![feature(unsized_tuple_coercion)]
 
 extern crate log;
@@ -29,9 +45,14 @@ use cli::{Args, Commands};
 use git::Config;
 
 use clap::Parser;
+
 #[allow(unused)]
 use log::{debug, error, info, trace, warn};
 
+/// The main loop of the binary
+///
+/// Here, we handle parsing the configuration file, as well as matching commands
+/// to the relavant operations.
 fn main() {
     pretty_env_logger::init();
     let args = Args::parse();

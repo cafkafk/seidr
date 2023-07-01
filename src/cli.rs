@@ -13,6 +13,8 @@
 //
 //    You should have received a copy of the GNU General Public License
 //    along with this program.  If not, see https://www.gnu.org/gpl-3.0.html.
+//
+//! Handles command line input
 
 use crate::utils::dir::home_dir;
 use crate::utils::strings::INTERACTIVE_NOTICE;
