@@ -217,6 +217,11 @@ impl GitRepo {
     }
 }
 
+struct SeriesItem<'series> {
+    operation: &'series str,
+    closure: Box<dyn Fn(&GitRepo) -> (bool)>,
+}
+
 impl Config {
     /* GIT RELATED */
     /// Reads the configuration toml from a path.
@@ -278,13 +283,25 @@ impl Config {
     /// without blocking the repos that don't have an issue.
     ///
     /// This is actually somewhat hairy to do, at least at 6:16 am :S
-    fn series_on_all<F>(&self, f: F)
-    where
-        F: Fn(&GitRepo),
-    {
+    ///
+    /// However, at 6:24, we're so ready! Let's go!
+    ///
+    /// Fun fact: only the last element of a tuple must have a dynamically typed size
+    fn series_on_all(&self, closures: Vec<SeriesItem>) {
         for (_, category) in self.categories.iter() {
             for (_, repo) in category.repos.iter() {
-                f(repo);
+                for instruction in closures.iter() {
+                    let f = &instruction.closure;
+                    let op = instruction.operation;
+                    let mut sp =
+                        Spinner::new(Spinners::Dots10, format!("{}: {}", repo.name, op).into());
+                    if f(repo) {
+                        sp.stop_and_persist("✔", format!("{}: {}", repo.name, op).into());
+                    } else {
+                        sp.stop_and_persist("❎", format!("{}: {}", repo.name, op).into());
+                        break;
+                    }
+                }
             }
         }
     }
@@ -317,10 +334,29 @@ impl Config {
     /// repositories, skips if fail.
     pub fn quick(&self, msg: &String) {
         debug!("exectuting quick");
-        self.on_all_spinner("pull", |repo| repo.pull());
-        self.on_all_spinner("add", |repo| repo.add_all());
-        self.on_all_spinner("commit", |repo| repo.commit_with_msg(msg));
-        self.on_all_spinner("push", |repo| repo.push());
+        let series: Vec<SeriesItem> = vec![
+            SeriesItem {
+                operation: "pull",
+                closure: Box::new(move |repo: &GitRepo| repo.pull()),
+            },
+            SeriesItem {
+                operation: "add",
+                closure: Box::new(move |repo: &GitRepo| repo.add_all()),
+            },
+            SeriesItem {
+                operation: "commit",
+                closure: Box::new(move |repo: &GitRepo| repo.commit()),
+            }, // FIXME doesn't take msg
+            SeriesItem {
+                operation: "push",
+                closure: Box::new(move |repo: &GitRepo| repo.push()),
+            },
+        ];
+        self.series_on_all(series);
+        // self.on_all_spinner("pull", |repo| repo.pull());
+        // self.on_all_spinner("add", |repo| repo.add_all());
+        // self.on_all_spinner("commit", |repo| repo.commit_with_msg(msg));
+        // self.on_all_spinner("push", |repo| repo.push());
     }
 
     /* LINK RELATED */

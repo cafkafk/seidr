@@ -13,6 +13,7 @@
 //
 //    You should have received a copy of the GNU General Public License
 //    along with this program.  If not, see https://www.gnu.org/gpl-3.0.html.
+#![feature(unsized_tuple_coercion)]
 
 extern crate log;
 extern crate pretty_env_logger;
