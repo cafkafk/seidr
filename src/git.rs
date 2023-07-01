@@ -236,6 +236,9 @@ impl Config {
     /// Runs associated function on all repos in config
     ///
     /// TODO: need to be made over a generic repo type
+    ///
+    /// NOTE: currently unused
+    ///
     fn on_all<F>(&self, f: F)
     where
         F: Fn(&GitRepo),
@@ -259,6 +262,29 @@ impl Config {
                 } else {
                     sp.stop_and_persist("❎", format!("{}: {}", repo.name, op).into());
                 }
+            }
+        }
+    }
+    /// Runs associated function on all repos in config
+    ///
+    /// TODO: need to be made over a generic repo type
+    ///
+    /// NOTE: currently unused
+    ///
+    /// # Current Problem
+    ///
+    /// The goal of this function is that it should run some function on all
+    /// repos but stop executing further functions on any repo that fails,
+    /// without blocking the repos that don't have an issue.
+    ///
+    /// This is actually somewhat hairy to do, at least at 6:16 am :S
+    fn series_on_all<F>(&self, f: F)
+    where
+        F: Fn(&GitRepo),
+    {
+        for (_, category) in self.categories.iter() {
+            for (_, repo) in category.repos.iter() {
+                f(repo);
             }
         }
     }
@@ -291,17 +317,10 @@ impl Config {
     /// repositories, skips if fail.
     pub fn quick(&self, msg: &String) {
         debug!("exectuting quick");
-        self.on_all(|repo| {
-            let mut sp = Spinner::new(Spinners::Dots10, format!("{}: pull", repo.name).into());
-            repo.pull();
-            sp = Spinner::new(Spinners::Dots10, format!("{}: add_all", repo.name).into());
-            repo.add_all();
-            sp = Spinner::new(Spinners::Dots10, format!("{}: commit", repo.name).into());
-            repo.commit_with_msg(msg);
-            sp = Spinner::new(Spinners::Dots10, format!("{}: push", repo.name).into());
-            repo.push();
-            sp.stop_and_persist("✔", format!("{}: quick", repo.name).into());
-        });
+        self.on_all_spinner("pull", |repo| repo.pull());
+        self.on_all_spinner("add", |repo| repo.add_all());
+        self.on_all_spinner("commit", |repo| repo.commit_with_msg(msg));
+        self.on_all_spinner("push", |repo| repo.push());
     }
 
     /* LINK RELATED */
