@@ -119,88 +119,94 @@ impl Links {
 
 impl GitRepo {
     /// Clones the repository to its specified folder.
-    fn clone(&self) {
+    fn clone(&self) -> bool {
         if self.flags.contains(&RepoFlags::Clone) {
             // TODO: check if &self.name already exists in dir
-            let out = Command::new("git")
+            let output = Command::new("git")
                 .current_dir(&self.path)
                 .arg("clone")
                 .arg(&self.url)
                 .arg(&self.name)
                 .output()
                 .unwrap_or_else(|_| panic!("git repo failed to clone: {:?}", &self,));
-            // info!("{out}");
+            output.status.success()
         } else {
             info!("{} has clone set to false, not cloned", &self.name);
+            false
         }
     }
     /// Pulls the repository if able.
-    fn pull(&self) {
+    fn pull(&self) -> bool {
         if self.flags.contains(&RepoFlags::Pull) {
-            let out = Command::new("git")
+            let output = Command::new("git")
                 .current_dir(format!("{}{}", &self.path, &self.name))
                 .arg("pull")
                 .output()
                 .unwrap_or_else(|_| panic!("git repo failed to pull: {:?}", &self,));
+            output.status.success()
         } else {
             info!("{} has clone set to false, not pulled", &self.name);
+            false
         }
-        // info!("{out}");
     }
     /// Adds all files in the repository.
-    fn add_all(&self) {
+    fn add_all(&self) -> bool {
         if self.flags.contains(&RepoFlags::Push) {
-            let out = Command::new("git")
+            let output = Command::new("git")
                 .current_dir(format!("{}{}", &self.path, &self.name))
                 .arg("add")
                 .arg(".")
                 .output()
                 .unwrap_or_else(|_| panic!("git repo failed to add: {:?}", &self,));
-            // info!("{out}");
+            output.status.success()
         } else {
             info!("{} has clone set to false, not cloned", &self.name);
+            false
         }
     }
     /// Tries to commit changes in the repository.
     #[allow(dead_code)]
-    fn commit(&self) {
+    fn commit(&self) -> bool {
         if self.flags.contains(&RepoFlags::Push) {
-            let out = Command::new("git")
+            let output = Command::new("git")
                 .current_dir(format!("{}{}", &self.path, &self.name))
                 .arg("commit")
                 .output()
                 .unwrap_or_else(|_| panic!("git repo failed to commit: {:?}", &self,));
-            // info!("{out}");
+            output.status.success()
         } else {
             info!("{} has clone set to false, not cloned", &self.name);
+            false
         }
     }
     /// Tries to commit changes with a message argument.
-    fn commit_with_msg(&self, msg: &String) {
+    fn commit_with_msg(&self, msg: &String) -> bool {
         if self.flags.contains(&RepoFlags::Push) {
-            let out = Command::new("git")
+            let output = Command::new("git")
                 .current_dir(format!("{}{}", &self.path, &self.name))
                 .arg("commit")
                 .arg("-m")
                 .arg(msg)
                 .output()
                 .unwrap_or_else(|_| panic!("git repo failed to commit: {:?}", &self,));
-            // info!("{out}");
+            output.status.success()
         } else {
             info!("{} has clone set to false, not cloned", &self.name);
+            false
         }
     }
     /// Attempts to push the repository.
-    fn push(&self) {
+    fn push(&self) -> bool {
         if self.flags.contains(&RepoFlags::Push) {
-            let out = Command::new("git")
+            let output = Command::new("git")
                 .current_dir(format!("{}{}", &self.path, &self.name))
                 .arg("push")
                 .output()
                 .unwrap_or_else(|_| panic!("git repo failed to push: {:?}", &self,));
-            // info!("{out}");
+            output.status.success()
         } else {
             info!("{} has clone set to false, not cloned", &self.name);
+            false
         }
     }
     /// Removes repository
@@ -242,51 +248,44 @@ impl Config {
     }
     fn on_all_spinner<F>(&self, op: &str, f: F)
     where
-        F: Fn(&GitRepo),
+        F: Fn(&GitRepo) -> bool,
     {
         for (_, category) in self.categories.iter() {
             for (_, repo) in category.repos.iter() {
                 let mut sp =
                     Spinner::new(Spinners::Dots10, format!("{}: {}", repo.name, op).into());
-                f(repo);
-                sp.stop_and_persist("✔", format!("{}: {}", repo.name, op).into());
+                if f(repo) {
+                    sp.stop_and_persist("✔", format!("{}: {}", repo.name, op).into());
+                } else {
+                    sp.stop_and_persist("❎", format!("{}: {}", repo.name, op).into());
+                }
             }
         }
     }
     /// Tries to pull all repositories, skips if fail.
     pub fn pull_all(&self) {
         debug!("exectuting pull_all");
-        self.on_all_spinner("pull", |repo| {
-            repo.pull();
-        });
+        self.on_all_spinner("pull", |repo| repo.pull());
     }
     /// Tries to clone all repositories, skips if fail.
     pub fn clone_all(&self) {
         debug!("exectuting clone_all");
-        self.on_all_spinner("clone", |repo| {
-            repo.clone();
-        });
+        self.on_all_spinner("clone", |repo| repo.clone());
     }
     /// Tries to add all work in all repositories, skips if fail.
     pub fn add_all(&self) {
         debug!("exectuting clone_all");
-        self.on_all_spinner("add", |repo| {
-            repo.add_all();
-        });
+        self.on_all_spinner("add", |repo| repo.add_all());
     }
     /// Tries to commit all repositories one at a time, skips if fail.
     pub fn commit_all(&self) {
         debug!("exectuting clone_all");
-        self.on_all_spinner("commit", |repo| {
-            repo.commit();
-        });
+        self.on_all_spinner("commit", |repo| repo.commit());
     }
     /// Tries to commit all repositories with msg, skips if fail.
     pub fn commit_all_msg(&self, msg: &String) {
         debug!("exectuting clone_all");
-        self.on_all_spinner("commit", |repo| {
-            repo.commit_with_msg(msg);
-        });
+        self.on_all_spinner("commit", |repo| repo.commit_with_msg(msg));
     }
     /// Tries to pull, add all, commit with msg "quick commit", and push all
     /// repositories, skips if fail.
