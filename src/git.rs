@@ -32,7 +32,7 @@ use std::{fs, process::Command};
 pub enum RepoFlags {
     Push,
     Clone,
-    // Pull, FIXME: could be interesting to implement
+    Pull,
 }
 
 /// Represents the config.toml file.
@@ -136,11 +136,15 @@ impl GitRepo {
     }
     /// Pulls the repository if able.
     fn pull(&self) {
-        let out = Command::new("git")
-            .current_dir(format!("{}{}", &self.path, &self.name))
-            .arg("pull")
-            .output()
-            .unwrap_or_else(|_| panic!("git repo failed to pull: {:?}", &self,));
+        if self.flags.contains(&RepoFlags::Pull) {
+            let out = Command::new("git")
+                .current_dir(format!("{}{}", &self.path, &self.name))
+                .arg("pull")
+                .output()
+                .unwrap_or_else(|_| panic!("git repo failed to pull: {:?}", &self,));
+        } else {
+            info!("{} has clone set to false, not pulled", &self.name);
+        }
         // info!("{out}");
     }
     /// Adds all files in the repository.
