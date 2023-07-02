@@ -73,7 +73,8 @@ pub struct Category {
     /// map of all categories
     ///
     /// Key should conceptually be seen as the name of the category.
-    pub repos: HashMap<String, GitRepo>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub repos: Option<HashMap<String, GitRepo>>,
 }
 
 /// Contain fields for a single link.
@@ -311,7 +312,7 @@ impl Config {
         F: Fn(&GitRepo),
     {
         for (_, category) in self.categories.iter() {
-            for (_, repo) in category.repos.iter() {
+            for (_, repo) in category.repos.as_ref().expect("failed to get repos").iter() {
                 f(repo);
             }
         }
@@ -326,7 +327,7 @@ impl Config {
         F: Fn(&GitRepo) -> bool,
     {
         for (_, category) in self.categories.iter() {
-            for (_, repo) in category.repos.iter() {
+            for (_, repo) in category.repos.as_ref().expect("failed to get repos").iter() {
                 let mut sp =
                     Spinner::new(Spinners::Dots10, format!("{}: {}", repo.name, op).into());
                 if f(repo) {
@@ -380,7 +381,7 @@ impl Config {
     /// ```
     pub fn series_on_all(&self, closures: Vec<SeriesItem>) {
         for (_, category) in self.categories.iter() {
-            for (_, repo) in category.repos.iter() {
+            for (_, repo) in category.repos.as_ref().expect("failed to get repos").iter() {
                 for instruction in closures.iter() {
                     let f = &instruction.closure;
                     let op = instruction.operation;
@@ -427,7 +428,7 @@ impl Config {
     /// ```
     pub fn all_on_all(&self, closures: Vec<SeriesItem>) {
         for (_, category) in self.categories.iter() {
-            for (_, repo) in category.repos.iter() {
+            for (_, repo) in category.repos.as_ref().expect("failed to get repos").iter() {
                 for instruction in closures.iter() {
                     let f = &instruction.closure;
                     let op = instruction.operation;

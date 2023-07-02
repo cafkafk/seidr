@@ -127,7 +127,7 @@ mod config {
     fn init_config_populate() {
         let default_category = Category {
             flags: Some(vec![]),
-            repos: HashMap::new(),
+            repos: Some(HashMap::new()),
         };
         let mut config = Config {
             categories: HashMap::new(),
@@ -142,6 +142,8 @@ mod config {
                 .get_mut(&format!("{}", 0).to_string())
                 .expect("category not found")
                 .repos
+                .as_mut()
+                .expect("failed to get repo")
                 .insert(
                     format!("{}", i).to_string(),
                     GitRepo {
@@ -196,6 +198,8 @@ mod config {
             .get(cat_name)
             .expect("failed to get category")
             .repos
+            .as_ref()
+            .expect("failed to get repo")
             .get(repo_name)
             .expect("failed to get category"))
     }

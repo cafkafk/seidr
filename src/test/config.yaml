@@ -24,6 +24,7 @@ categories:
         path: /home/ces/org/src/git/
         url: git@github.com:cafkafk/li.git
         flags: [Clone, Push]
+  empty:
 links:
   - name: gg
     rx: /home/ces/.config/gg
