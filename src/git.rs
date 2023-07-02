@@ -189,20 +189,22 @@ impl GitRepo {
     }
     /// Tries to commit changes in the repository.
     ///
-    /// BUG does not work with output should use status() instead so it opens
-    /// the editor
+    /// # Development
+    ///
+    /// - FIXME: this prints extra information to terminal this is because we
+    /// use status() instead of output(), as that makes using the native editor
+    /// easy
     #[allow(dead_code)]
     fn commit(&self) -> bool {
         if self.flags.contains(&RepoFlags::Push) {
-            let output = Command::new("git")
+            let status = Command::new("git")
                 .current_dir(format!("{}{}", &self.path, &self.name))
                 .arg("commit")
-                .output()
+                .status()
                 .unwrap_or_else(|_| panic!("git repo failed to commit: {:?}", &self,));
-            println!("{output:?}");
-            output.status.success()
+            status.success()
         } else {
-            info!("{} has clone set to false, not cloned", &self.name);
+            info!("{} has push set to false, not cloned", &self.name);
             false
         }
     }

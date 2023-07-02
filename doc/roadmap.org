@@ -5,10 +5,10 @@
 - [ ] Generic repositories
 - [ ] Version pinning
 - [ ] libgit2 (maybe)
-* 0.1.0 [0%] [0/5]
-- [-] No functionality regressions
+* 0.1.0 [20%] [1/5]
+- [X] No functionality regressions
   - [X] commit works in quick, fast
-  - [-] commit with edit works
+  - [X] commit with edit works
 - [ ] Repo Flags Finished
 - [ ] Category Flags Finished
 - [ ] Optional Fields
