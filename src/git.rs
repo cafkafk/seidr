@@ -92,7 +92,8 @@ pub struct GitRepo {
     pub name: String,
     pub path: String,
     pub url: String,
-    pub flags: Vec<RepoFlags>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub flags: Option<Vec<RepoFlags>>,
 }
 
 ////////////////////////////////////
@@ -157,7 +158,12 @@ impl Links {
 impl GitRepo {
     /// Clones the repository to its specified folder.
     fn clone(&self) -> bool {
-        if self.flags.contains(&RepoFlags::Clone) {
+        if self
+            .flags
+            .as_ref()
+            .expect("failed to unwrap flags")
+            .contains(&RepoFlags::Clone)
+        {
             // TODO: check if &self.name already exists in dir
             let output = Command::new("git")
                 .current_dir(&self.path)
@@ -176,6 +182,8 @@ impl GitRepo {
     fn pull(&self) -> bool {
         if self
             .flags
+            .as_ref()
+            .expect("failed to unwrap flags")
             .iter()
             .any(|s| s == &RepoFlags::Pull || s == &RepoFlags::Fast)
         {
@@ -194,6 +202,8 @@ impl GitRepo {
     fn add_all(&self) -> bool {
         if self
             .flags
+            .as_ref()
+            .expect("failed to unwrap flags")
             .iter()
             .any(|s| s == &RepoFlags::Add || s == &RepoFlags::Quick || s == &RepoFlags::Fast)
         {
@@ -220,6 +230,8 @@ impl GitRepo {
     fn commit(&self) -> bool {
         if self
             .flags
+            .as_ref()
+            .expect("failed to unwrap flags")
             .iter()
             .any(|s| s == &RepoFlags::Commit || s == &RepoFlags::Quick || s == &RepoFlags::Fast)
         {
@@ -238,6 +250,8 @@ impl GitRepo {
     fn commit_with_msg(&self, msg: &str) -> bool {
         if self
             .flags
+            .as_ref()
+            .expect("failed to unwrap flags")
             .iter()
             .any(|s| s == &RepoFlags::Commit || s == &RepoFlags::Quick || s == &RepoFlags::Fast)
         {
@@ -258,6 +272,8 @@ impl GitRepo {
     fn push(&self) -> bool {
         if self
             .flags
+            .as_ref()
+            .expect("failed to unwrap flags")
             .iter()
             .any(|s| s == &RepoFlags::Push || s == &RepoFlags::Quick || s == &RepoFlags::Fast)
         {

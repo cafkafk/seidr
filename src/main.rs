@@ -150,7 +150,7 @@ mod config {
                         name: "test repo".to_string(),
                         path: "/tmp".to_string(),
                         url: "https://github.com/cafkafk/gg".to_string(),
-                        flags: vec![Clone, Push],
+                        flags: Some(vec![Clone, Push]),
                     },
                 );
         }
