@@ -126,8 +126,8 @@ mod config {
     #[test]
     fn init_config_populate() {
         let default_category = Category {
-            flags: vec![],
-            repos: HashMap::new(),
+            flags: Some(vec![]),
+            repos: Some(HashMap::new()),
         };
         let mut config = Config {
             categories: HashMap::new(),
@@ -142,13 +142,15 @@ mod config {
                 .get_mut(&format!("{}", 0).to_string())
                 .expect("category not found")
                 .repos
+                .as_mut()
+                .expect("failed to get repo")
                 .insert(
                     format!("{}", i).to_string(),
                     GitRepo {
                         name: "test repo".to_string(),
                         path: "/tmp".to_string(),
                         url: "https://github.com/cafkafk/gg".to_string(),
-                        flags: vec![Clone, Push],
+                        flags: Some(vec![Clone, Push]),
                     },
                 );
         }
@@ -196,6 +198,8 @@ mod config {
             .get(cat_name)
             .expect("failed to get category")
             .repos
+            .as_ref()
+            .expect("failed to get repo")
             .get(repo_name)
             .expect("failed to get category"))
     }

@@ -28,12 +28,24 @@ use std::{fs, process::Command};
 /// An enum containing flags that change behaviour of repos and categories
 #[derive(PartialOrd, Ord, PartialEq, Eq, Serialize, Deserialize, Debug)]
 pub enum RepoFlags {
-    /// If push is set, the repository should respond to the push subcommand
-    Push,
     /// If clone is set, the repository should respond to the clone subcommand
     Clone,
     /// If pull is set, the repository should respond to the pull subcommand
     Pull,
+    /// If add is set, the repository should respond to the add subcommand
+    Add,
+    /// If commit is set, the repository should respond to the commit subcommand
+    Commit,
+    /// If push is set, the repository should respond to the push subcommand
+    Push,
+    /// If push is set, the repository should respond to the Qucik subcommand
+    ///
+    /// This is a shortcut for Add, Commit, Push
+    Quick,
+    /// If push is set, the repository should respond to the Fast and Qucik  subcommand
+    ///
+    /// This is a shortcut for Pull, Add, Commit, Push
+    Fast,
 }
 
 /// Represents the config.toml file.
@@ -56,11 +68,13 @@ pub struct Config {
 /// This allows you to organize your repositories into categories
 #[derive(PartialEq, Debug, Serialize, Deserialize)]
 pub struct Category {
-    pub flags: Vec<RepoFlags>, // FIXME: not implemented
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub flags: Option<Vec<RepoFlags>>, // FIXME: not implemented
     /// map of all categories
     ///
     /// Key should conceptually be seen as the name of the category.
-    pub repos: HashMap<String, GitRepo>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub repos: Option<HashMap<String, GitRepo>>,
 }
 
 /// Contain fields for a single link.
@@ -78,7 +92,8 @@ pub struct GitRepo {
     pub name: String,
     pub path: String,
     pub url: String,
-    pub flags: Vec<RepoFlags>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub flags: Option<Vec<RepoFlags>>,
 }
 
 ////////////////////////////////////
@@ -143,7 +158,12 @@ impl Links {
 impl GitRepo {
     /// Clones the repository to its specified folder.
     fn clone(&self) -> bool {
-        if self.flags.contains(&RepoFlags::Clone) {
+        if self
+            .flags
+            .as_ref()
+            .expect("failed to unwrap flags")
+            .contains(&RepoFlags::Clone)
+        {
             // TODO: check if &self.name already exists in dir
             let output = Command::new("git")
                 .current_dir(&self.path)
@@ -160,7 +180,13 @@ impl GitRepo {
     }
     /// Pulls the repository if able.
     fn pull(&self) -> bool {
-        if self.flags.contains(&RepoFlags::Pull) {
+        if self
+            .flags
+            .as_ref()
+            .expect("failed to unwrap flags")
+            .iter()
+            .any(|s| s == &RepoFlags::Pull || s == &RepoFlags::Fast)
+        {
             let output = Command::new("git")
                 .current_dir(format!("{}{}", &self.path, &self.name))
                 .arg("pull")
@@ -174,7 +200,13 @@ impl GitRepo {
     }
     /// Adds all files in the repository.
     fn add_all(&self) -> bool {
-        if self.flags.contains(&RepoFlags::Push) {
+        if self
+            .flags
+            .as_ref()
+            .expect("failed to unwrap flags")
+            .iter()
+            .any(|s| s == &RepoFlags::Add || s == &RepoFlags::Quick || s == &RepoFlags::Fast)
+        {
             let output = Command::new("git")
                 .current_dir(format!("{}{}", &self.path, &self.name))
                 .arg("add")
@@ -196,7 +228,13 @@ impl GitRepo {
     /// easy
     #[allow(dead_code)]
     fn commit(&self) -> bool {
-        if self.flags.contains(&RepoFlags::Push) {
+        if self
+            .flags
+            .as_ref()
+            .expect("failed to unwrap flags")
+            .iter()
+            .any(|s| s == &RepoFlags::Commit || s == &RepoFlags::Quick || s == &RepoFlags::Fast)
+        {
             let status = Command::new("git")
                 .current_dir(format!("{}{}", &self.path, &self.name))
                 .arg("commit")
@@ -210,7 +248,13 @@ impl GitRepo {
     }
     /// Tries to commit changes with a message argument.
     fn commit_with_msg(&self, msg: &str) -> bool {
-        if self.flags.contains(&RepoFlags::Push) {
+        if self
+            .flags
+            .as_ref()
+            .expect("failed to unwrap flags")
+            .iter()
+            .any(|s| s == &RepoFlags::Commit || s == &RepoFlags::Quick || s == &RepoFlags::Fast)
+        {
             let output = Command::new("git")
                 .current_dir(format!("{}{}", &self.path, &self.name))
                 .arg("commit")
@@ -226,7 +270,13 @@ impl GitRepo {
     }
     /// Attempts to push the repository.
     fn push(&self) -> bool {
-        if self.flags.contains(&RepoFlags::Push) {
+        if self
+            .flags
+            .as_ref()
+            .expect("failed to unwrap flags")
+            .iter()
+            .any(|s| s == &RepoFlags::Push || s == &RepoFlags::Quick || s == &RepoFlags::Fast)
+        {
             let output = Command::new("git")
                 .current_dir(format!("{}{}", &self.path, &self.name))
                 .arg("push")
@@ -278,7 +328,7 @@ impl Config {
         F: Fn(&GitRepo),
     {
         for (_, category) in self.categories.iter() {
-            for (_, repo) in category.repos.iter() {
+            for (_, repo) in category.repos.as_ref().expect("failed to get repos").iter() {
                 f(repo);
             }
         }
@@ -293,7 +343,7 @@ impl Config {
         F: Fn(&GitRepo) -> bool,
     {
         for (_, category) in self.categories.iter() {
-            for (_, repo) in category.repos.iter() {
+            for (_, repo) in category.repos.as_ref().expect("failed to get repos").iter() {
                 let mut sp =
                     Spinner::new(Spinners::Dots10, format!("{}: {}", repo.name, op).into());
                 if f(repo) {
@@ -347,7 +397,7 @@ impl Config {
     /// ```
     pub fn series_on_all(&self, closures: Vec<SeriesItem>) {
         for (_, category) in self.categories.iter() {
-            for (_, repo) in category.repos.iter() {
+            for (_, repo) in category.repos.as_ref().expect("failed to get repos").iter() {
                 for instruction in closures.iter() {
                     let f = &instruction.closure;
                     let op = instruction.operation;
@@ -394,7 +444,7 @@ impl Config {
     /// ```
     pub fn all_on_all(&self, closures: Vec<SeriesItem>) {
         for (_, category) in self.categories.iter() {
-            for (_, repo) in category.repos.iter() {
+            for (_, repo) in category.repos.as_ref().expect("failed to get repos").iter() {
                 for instruction in closures.iter() {
                     let f = &instruction.closure;
                     let op = instruction.operation;
