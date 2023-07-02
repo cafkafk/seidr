@@ -43,6 +43,7 @@ mod utils;
 
 use cli::{Args, Commands};
 use git::Config;
+use utils::strings::QUICK_COMMIT;
 
 use clap::Parser;
 
@@ -68,7 +69,7 @@ fn main() {
             config.link_all();
         }
         Some(Commands::Quick { msg }) => {
-            config.quick(msg.as_ref().get_or_insert(&"gg: quick commit".to_string()));
+            config.quick(QUICK_COMMIT);
         }
         Some(Commands::Fast { msg }) => {
             config.fast(msg.as_ref().get_or_insert(&"gg: fast commit".to_string()));

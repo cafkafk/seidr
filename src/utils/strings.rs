@@ -45,3 +45,6 @@ but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 ";
+
+/// Contains the message for quick commit subcommit
+pub const QUICK_COMMIT: &'static str = "git: quick commit";

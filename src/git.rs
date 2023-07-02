@@ -188,6 +188,9 @@ impl GitRepo {
         }
     }
     /// Tries to commit changes in the repository.
+    ///
+    /// BUG does not work with output should use status() instead so it opens
+    /// the editor
     #[allow(dead_code)]
     fn commit(&self) -> bool {
         if self.flags.contains(&RepoFlags::Push) {
@@ -196,6 +199,7 @@ impl GitRepo {
                 .arg("commit")
                 .output()
                 .unwrap_or_else(|_| panic!("git repo failed to commit: {:?}", &self,));
+            println!("{output:?}");
             output.status.success()
         } else {
             info!("{} has clone set to false, not cloned", &self.name);
@@ -203,7 +207,7 @@ impl GitRepo {
         }
     }
     /// Tries to commit changes with a message argument.
-    fn commit_with_msg(&self, msg: &String) -> bool {
+    fn commit_with_msg(&self, msg: &str) -> bool {
         if self.flags.contains(&RepoFlags::Push) {
             let output = Command::new("git")
                 .current_dir(format!("{}{}", &self.path, &self.name))
@@ -427,7 +431,7 @@ impl Config {
         self.on_all_spinner("commit", |repo| repo.commit());
     }
     /// Tries to commit all repositories with msg, skips if fail.
-    pub fn commit_all_msg(&self, msg: &String) {
+    pub fn commit_all_msg(&self, msg: &str) {
         debug!("exectuting clone_all");
         self.on_all_spinner("commit", |repo| repo.commit_with_msg(msg));
     }
@@ -435,7 +439,7 @@ impl Config {
     /// repositories, skips if fail.
     ///
     /// FIXME currently msg isn't used
-    pub fn quick(&self, msg: &String) {
+    pub fn quick(&self, msg: &'static str) {
         debug!("exectuting quick");
         let series: Vec<SeriesItem> = vec![
             SeriesItem {
@@ -448,7 +452,7 @@ impl Config {
             },
             SeriesItem {
                 operation: "commit",
-                closure: Box::new(move |repo: &GitRepo| repo.commit()),
+                closure: Box::new(move |repo: &GitRepo| repo.commit_with_msg(msg)),
             }, // FIXME doesn't take msg
             SeriesItem {
                 operation: "push",
@@ -461,7 +465,7 @@ impl Config {
     /// repositories, skips if fail.
     ///
     /// FIXME currently msg isn't used
-    pub fn fast(&self, msg: &String) {
+    pub fn fast(&self, msg: &str) {
         debug!("exectuting fast");
         let series: Vec<SeriesItem> = vec![
             SeriesItem {
