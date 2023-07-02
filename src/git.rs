@@ -68,7 +68,8 @@ pub struct Config {
 /// This allows you to organize your repositories into categories
 #[derive(PartialEq, Debug, Serialize, Deserialize)]
 pub struct Category {
-    pub flags: Vec<RepoFlags>, // FIXME: not implemented
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub flags: Option<Vec<RepoFlags>>, // FIXME: not implemented
     /// map of all categories
     ///
     /// Key should conceptually be seen as the name of the category.

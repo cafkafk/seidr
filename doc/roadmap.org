@@ -11,5 +11,5 @@
   - [X] commit with edit works
 - [X] Repo Flags Finished
 - [ ] Category Flags Finished
-- [ ] Optional Fields
+- [-] Optional Fields
 - [ ] Subcommands

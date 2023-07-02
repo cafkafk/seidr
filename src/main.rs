@@ -126,7 +126,7 @@ mod config {
     #[test]
     fn init_config_populate() {
         let default_category = Category {
-            flags: vec![],
+            flags: Some(vec![]),
             repos: HashMap::new(),
         };
         let mut config = Config {
