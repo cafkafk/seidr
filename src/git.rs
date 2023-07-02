@@ -28,12 +28,16 @@ use std::{fs, process::Command};
 /// An enum containing flags that change behaviour of repos and categories
 #[derive(PartialOrd, Ord, PartialEq, Eq, Serialize, Deserialize, Debug)]
 pub enum RepoFlags {
-    /// If push is set, the repository should respond to the push subcommand
-    Push,
     /// If clone is set, the repository should respond to the clone subcommand
     Clone,
     /// If pull is set, the repository should respond to the pull subcommand
     Pull,
+    /// If add is set, the repository should respond to the add subcommand
+    Add,
+    /// If commit is set, the repository should respond to the commit subcommand
+    Commit,
+    /// If push is set, the repository should respond to the push subcommand
+    Push,
 }
 
 /// Represents the config.toml file.
@@ -174,7 +178,7 @@ impl GitRepo {
     }
     /// Adds all files in the repository.
     fn add_all(&self) -> bool {
-        if self.flags.contains(&RepoFlags::Push) {
+        if self.flags.contains(&RepoFlags::Add) {
             let output = Command::new("git")
                 .current_dir(format!("{}{}", &self.path, &self.name))
                 .arg("add")
@@ -196,7 +200,7 @@ impl GitRepo {
     /// easy
     #[allow(dead_code)]
     fn commit(&self) -> bool {
-        if self.flags.contains(&RepoFlags::Push) {
+        if self.flags.contains(&RepoFlags::Commit) {
             let status = Command::new("git")
                 .current_dir(format!("{}{}", &self.path, &self.name))
                 .arg("commit")
@@ -210,7 +214,7 @@ impl GitRepo {
     }
     /// Tries to commit changes with a message argument.
     fn commit_with_msg(&self, msg: &str) -> bool {
-        if self.flags.contains(&RepoFlags::Push) {
+        if self.flags.contains(&RepoFlags::Commit) {
             let output = Command::new("git")
                 .current_dir(format!("{}{}", &self.path, &self.name))
                 .arg("commit")
