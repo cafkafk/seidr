@@ -1,12 +1,14 @@
 #+title: Roadmap
 
-* Roadmap
+* Roadmap [0%] [0/4]
 - [ ] Custom operation sequences
 - [ ] Generic repositories
 - [ ] Version pinning
 - [ ] libgit2 (maybe)
-* 0.1.0
+* 0.1.0 [0%] [0/5]
 - [-] No functionality regressions
+  - [X] commit works in quick, fast
+  - [-] commit with edit works
 - [ ] Repo Flags Finished
 - [ ] Category Flags Finished
 - [ ] Optional Fields

@@ -43,7 +43,7 @@ mod utils;
 
 use cli::{Args, Commands};
 use git::Config;
-use utils::strings::QUICK_COMMIT;
+use utils::strings::{FAST_COMMIT, QUICK_COMMIT};
 
 use clap::Parser;
 
@@ -56,7 +56,7 @@ use log::{debug, error, info, trace, warn};
 /// to the relavant operations.
 fn main() {
     pretty_env_logger::init();
-    let args = Args::parse();
+    let mut args = Args::parse();
     let config = Config::new(&args.config);
     match &args {
         args if args.license => println!("{}", utils::strings::INTERACTIVE_LICENSE),
@@ -64,15 +64,27 @@ fn main() {
         args if args.code_of_conduct => unimplemented!(),
         _ => (),
     }
-    match &args.command {
+    match &mut args.command {
         Some(Commands::Link { msg: _ }) => {
             config.link_all();
         }
         Some(Commands::Quick { msg }) => {
-            config.quick(QUICK_COMMIT);
+            let s = Box::leak(
+                msg.as_mut()
+                    .get_or_insert(&mut QUICK_COMMIT.to_string())
+                    .clone()
+                    .into_boxed_str(),
+            );
+            config.quick(s);
         }
         Some(Commands::Fast { msg }) => {
-            config.fast(msg.as_ref().get_or_insert(&"gg: fast commit".to_string()));
+            let s = Box::leak(
+                msg.as_mut()
+                    .get_or_insert(&mut FAST_COMMIT.to_string())
+                    .clone()
+                    .into_boxed_str(),
+            );
+            config.fast(s);
         }
         Some(Commands::Clone { msg: _ }) => {
             config.clone_all();

@@ -46,5 +46,8 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 ";
 
-/// Contains the message for quick commit subcommit
-pub const QUICK_COMMIT: &'static str = "git: quick commit";
+/// Contains the message for quick commit subcommand
+pub const QUICK_COMMIT: &str = "git: quick commit";
+
+/// Contains the message for fast commit subcommand
+pub const FAST_COMMIT: &str = "git: fast commit";

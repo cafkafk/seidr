@@ -437,8 +437,6 @@ impl Config {
     }
     /// Tries to pull, add all, commit with msg "quick commit", and push all
     /// repositories, skips if fail.
-    ///
-    /// FIXME currently msg isn't used
     pub fn quick(&self, msg: &'static str) {
         debug!("exectuting quick");
         let series: Vec<SeriesItem> = vec![
@@ -453,7 +451,7 @@ impl Config {
             SeriesItem {
                 operation: "commit",
                 closure: Box::new(move |repo: &GitRepo| repo.commit_with_msg(msg)),
-            }, // FIXME doesn't take msg
+            },
             SeriesItem {
                 operation: "push",
                 closure: Box::new(move |repo: &GitRepo| repo.push()),
@@ -463,9 +461,7 @@ impl Config {
     }
     /// Tries to pull, add all, commit with msg "quick commit", and push all
     /// repositories, skips if fail.
-    ///
-    /// FIXME currently msg isn't used
-    pub fn fast(&self, msg: &str) {
+    pub fn fast(&self, msg: &'static str) {
         debug!("exectuting fast");
         let series: Vec<SeriesItem> = vec![
             SeriesItem {
@@ -479,7 +475,7 @@ impl Config {
             SeriesItem {
                 operation: "commit",
                 closure: Box::new(move |repo: &GitRepo| repo.commit()),
-            }, // FIXME doesn't take msg
+            },
             SeriesItem {
                 operation: "push",
                 closure: Box::new(move |repo: &GitRepo| repo.push()),
