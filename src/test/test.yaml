@@ -19,17 +19,17 @@ categories:
   utils:
     flags: []
     repos:
-      li:
-        name: li
-        path: /home/ces/org/src/git/
-        url: git@github.com:cafkafk/li.git
-        flags:
-        - Clone
-        - Push
       gg:
         name: gg
         path: /home/ces/.dots/
         url: git@github.com:cafkafk/gg.git
+        flags:
+        - Clone
+        - Push
+      li:
+        name: li
+        path: /home/ces/org/src/git/
+        url: git@github.com:cafkafk/li.git
         flags:
         - Clone
         - Push
