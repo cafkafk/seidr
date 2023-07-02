@@ -13,6 +13,8 @@
 //
 //    You should have received a copy of the GNU General Public License
 //    along with this program.  If not, see https://www.gnu.org/gpl-3.0.html.
+//
+//! Sublibrary for useful functions
 
 pub mod dir;
 pub mod strings;

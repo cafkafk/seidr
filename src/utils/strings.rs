@@ -13,14 +13,19 @@
 //
 //    You should have received a copy of the GNU General Public License
 //    along with this program.  If not, see https://www.gnu.org/gpl-3.0.html.
+//
+//! Module for chunk of text
+//!
+//! Ideally, at a VERY long term scale, this should be a nice pattern for
+//! possible translations.
 
 /// Contains the notice for interactive programs from the GPLv3's "How to Apply
 /// These Terms to Your New Programs"
 pub const INTERACTIVE_NOTICE: &str = "\
 gg  Copyright (C) 2023  Christina Sørensen <christina@cafkafk.com>
-This program comes with ABSOLUTELY NO WARRANTY; for details type `show w'.
+This program comes with ABSOLUTELY NO WARRANTY; for details type `gg --warranty'.
 This is free software, and you are welcome to redistribute it
-under certain conditions; type `show c' for details.
+under certain conditions; type `gg --license' for details.
 ";
 
 /// Contains the license part of the long notice for interactive programs from
@@ -40,3 +45,9 @@ but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 ";
+
+/// Contains the message for quick commit subcommand
+pub const QUICK_COMMIT: &str = "git: quick commit";
+
+/// Contains the message for fast commit subcommand
+pub const FAST_COMMIT: &str = "git: fast commit";

@@ -1,3 +1,3 @@
 #!/usr/bin/env bash
 cargo rustc --release -- -C target-cpu=native
-cp ./target/release/gg ~/.local/bin
+cargo install --path .

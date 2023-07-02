@@ -13,6 +13,23 @@
 //
 //    You should have received a copy of the GNU General Public License
 //    along with this program.  If not, see https://www.gnu.org/gpl-3.0.html.
+//
+//! A Rust GitOps/symlinkfarm orchestrator inspired by GNU Stow.
+//!
+//! # What is?
+//!
+//! A Rust GitOps/symlinkfarm orchestrator inspired by GNU Stow. Useful for dealing
+//! with "dotfiles", and with git support as a first class feature. Configuration is
+//! done throug a single yaml file, giving it a paradigm that should bring joy to
+//! those that use declarative operating systems and package managers.
+//!
+//! Although this isn't really a case where it matters *that* much for performance,
+//! being written in rust instead of e.g. /janky/ scripting languages does also mean
+//! it is snappy and reliable, and the /extensive/ testing helps ensure regressions
+//! aren't introduced.
+//!
+//! That said, we're in 0.0.Z, *here be dragons* for now.
+#![feature(unsized_tuple_coercion)]
 
 extern crate log;
 extern crate pretty_env_logger;
@@ -26,14 +43,20 @@ mod utils;
 
 use cli::{Args, Commands};
 use git::Config;
+use utils::strings::{FAST_COMMIT, QUICK_COMMIT};
 
 use clap::Parser;
+
 #[allow(unused)]
 use log::{debug, error, info, trace, warn};
 
+/// The main loop of the binary
+///
+/// Here, we handle parsing the configuration file, as well as matching commands
+/// to the relavant operations.
 fn main() {
     pretty_env_logger::init();
-    let args = Args::parse();
+    let mut args = Args::parse();
     let config = Config::new(&args.config);
     match &args {
         args if args.license => println!("{}", utils::strings::INTERACTIVE_LICENSE),
@@ -41,12 +64,27 @@ fn main() {
         args if args.code_of_conduct => unimplemented!(),
         _ => (),
     }
-    match &args.command {
+    match &mut args.command {
         Some(Commands::Link { msg: _ }) => {
             config.link_all();
         }
         Some(Commands::Quick { msg }) => {
-            config.quick(msg.as_ref().get_or_insert(&"gg: quick commit".to_string()));
+            let s = Box::leak(
+                msg.as_mut()
+                    .get_or_insert(&mut QUICK_COMMIT.to_string())
+                    .clone()
+                    .into_boxed_str(),
+            );
+            config.quick(s);
+        }
+        Some(Commands::Fast { msg }) => {
+            let s = Box::leak(
+                msg.as_mut()
+                    .get_or_insert(&mut FAST_COMMIT.to_string())
+                    .clone()
+                    .into_boxed_str(),
+            );
+            config.fast(s);
         }
         Some(Commands::Clone { msg: _ }) => {
             config.clone_all();
@@ -71,35 +109,51 @@ fn main() {
 #[cfg(test)]
 mod config {
     use crate::*;
-    use git::GitRepo;
+    use git::RepoFlags::{Clone, Push};
+    use git::{Category, GitRepo};
     use relative_path::RelativePath;
+    use std::collections::HashMap;
     use std::env::current_dir;
     use std::fs::File;
     use std::io::prelude::*;
     #[test]
     fn init_config() {
         let _config = Config {
-            repos: vec![],
+            categories: HashMap::new(),
             links: vec![],
         };
     }
     #[test]
     fn init_config_populate() {
+        let default_category = Category {
+            flags: vec![],
+            repos: HashMap::new(),
+        };
         let mut config = Config {
-            repos: vec![],
+            categories: HashMap::new(),
             links: vec![],
         };
-        for _ in 0..=5 {
-            let repo = GitRepo {
-                name: "test repo".to_string(),
-                path: "/tmp".to_string(),
-                url: "https://github.com/cafkafk/gg".to_string(),
-                clone: false,
-            };
-            config.repos.push(repo);
+        config
+            .categories
+            .insert(format!("{}", 0).to_string(), default_category);
+        for i in 0..=5 {
+            config
+                .categories
+                .get_mut(&format!("{}", 0).to_string())
+                .expect("category not found")
+                .repos
+                .insert(
+                    format!("{}", i).to_string(),
+                    GitRepo {
+                        name: "test repo".to_string(),
+                        path: "/tmp".to_string(),
+                        url: "https://github.com/cafkafk/gg".to_string(),
+                        flags: vec![Clone, Push],
+                    },
+                );
         }
-        let yaml = serde_yaml::to_string(&config).unwrap();
-        println!("{}", yaml);
+        // let yaml = serde_yaml::to_string(&config).unwrap();
+        // println!("{}", yaml);
     }
     #[test]
     fn read_config_populate() {
@@ -130,8 +184,23 @@ mod config {
         let test_config = Config::new(&RelativePath::new("./src/test/test.yaml").to_string());
         assert_eq!(config, test_config);
     }
+    fn get_category<'cat>(config: &'cat Config, name: &'cat str) -> &'cat Category {
+        config.categories.get(name).expect("failed to get category")
+    }
+    fn get_repo<F>(config: &Config, cat_name: &str, repo_name: &str, f: F)
+    where
+        F: FnOnce(&GitRepo),
+    {
+        f(config
+            .categories
+            .get(cat_name)
+            .expect("failed to get category")
+            .repos
+            .get(repo_name)
+            .expect("failed to get category"))
+    }
     #[test]
-    fn read_and_verify_config() {
+    fn is_config_readable() {
         let root = current_dir().unwrap();
         let config = Config::new(
             &RelativePath::new("./src/test/config.yaml")
@@ -140,31 +209,16 @@ mod config {
                 .into_string()
                 .unwrap(),
         );
-        // FIXME This is unnecessarily terse
+
+        let flags = vec![Clone, Push];
+        // FIXME not very extensive
         #[allow(clippy::bool_assert_comparison)]
         {
-            assert_eq!(config.repos[0].name, "gg");
-            assert_eq!(config.repos[0].path, "/home/ces/.dots/");
-            assert_eq!(config.repos[0].url, "git@github.com:cafkafk/gg.git");
-            assert_eq!(config.repos[0].clone, true);
-            assert_eq!(config.repos[1].name, "li");
-            assert_eq!(config.repos[1].path, "/home/ces/org/src/git/");
-            assert_eq!(config.repos[1].url, "git@github.com:cafkafk/li.git");
-            assert_eq!(config.repos[1].clone, true);
-            assert_eq!(config.repos[2].name, "qmk_firmware");
-            assert_eq!(config.repos[2].path, "/home/ces/org/src/git/");
-            assert_eq!(
-                config.repos[2].url,
-                "git@github.com:cafkafk/qmk_firmware.git"
-            );
-            assert_eq!(config.repos[2].clone, true);
-            assert_eq!(config.repos[3].name, "starship");
-            assert_eq!(config.repos[3].path, "/home/ces/org/src/git/");
-            assert_eq!(
-                config.repos[3].url,
-                "https://github.com/starship/starship.git"
-            );
-            assert_eq!(config.repos[3].clone, true);
+            get_repo(&config, "config", "qmk_firmware", |repo| {
+                assert_eq!(repo.name, "qmk_firmware");
+                assert_eq!(repo.path, "/home/ces/org/src/git/");
+                assert_eq!(repo.url, "git@github.com:cafkafk/qmk_firmware.git");
+            })
         }
         {
             assert_eq!(config.links[0].name, "gg");
@@ -173,6 +227,7 @@ mod config {
             assert_eq!(config.links[1].name, "starship");
             assert_eq!(config.links[1].rx, "/home/ces/.config/starship.toml");
             assert_eq!(config.links[1].tx, "/home/ces/.dots/starship.toml");
+            // FIXME doesn't check repoflags
         }
     }
 }

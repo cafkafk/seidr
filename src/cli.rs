@@ -13,6 +13,8 @@
 //
 //    You should have received a copy of the GNU General Public License
 //    along with this program.  If not, see https://www.gnu.org/gpl-3.0.html.
+//
+//! Handles command line input
 
 use crate::utils::dir::home_dir;
 use crate::utils::strings::INTERACTIVE_NOTICE;
@@ -74,6 +76,10 @@ pub enum Commands {
     /// Do quick pull-commit-push with msg for commit
     #[command(visible_alias = "q")]
     Quick { msg: Option<String> },
+
+    /// Do fast pull-commit-push with msg for commit, skipping repo on failure
+    #[command(visible_alias = "f")]
+    Fast { msg: Option<String> },
 
     /// Clone all repositories
     #[command(visible_alias = "c")]
