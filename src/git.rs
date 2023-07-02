@@ -38,6 +38,14 @@ pub enum RepoFlags {
     Commit,
     /// If push is set, the repository should respond to the push subcommand
     Push,
+    /// If push is set, the repository should respond to the Qucik subcommand
+    ///
+    /// This is a shortcut for Add, Commit, Push
+    Quick,
+    /// If push is set, the repository should respond to the Fast and Qucik  subcommand
+    ///
+    /// This is a shortcut for Pull, Add, Commit, Push
+    Fast,
 }
 
 /// Represents the config.toml file.
@@ -164,7 +172,11 @@ impl GitRepo {
     }
     /// Pulls the repository if able.
     fn pull(&self) -> bool {
-        if self.flags.contains(&RepoFlags::Pull) {
+        if self
+            .flags
+            .iter()
+            .any(|s| s == &RepoFlags::Pull || s == &RepoFlags::Fast)
+        {
             let output = Command::new("git")
                 .current_dir(format!("{}{}", &self.path, &self.name))
                 .arg("pull")
@@ -178,7 +190,11 @@ impl GitRepo {
     }
     /// Adds all files in the repository.
     fn add_all(&self) -> bool {
-        if self.flags.contains(&RepoFlags::Add) {
+        if self
+            .flags
+            .iter()
+            .any(|s| s == &RepoFlags::Add || s == &RepoFlags::Quick || s == &RepoFlags::Fast)
+        {
             let output = Command::new("git")
                 .current_dir(format!("{}{}", &self.path, &self.name))
                 .arg("add")
@@ -200,7 +216,11 @@ impl GitRepo {
     /// easy
     #[allow(dead_code)]
     fn commit(&self) -> bool {
-        if self.flags.contains(&RepoFlags::Commit) {
+        if self
+            .flags
+            .iter()
+            .any(|s| s == &RepoFlags::Commit || s == &RepoFlags::Quick || s == &RepoFlags::Fast)
+        {
             let status = Command::new("git")
                 .current_dir(format!("{}{}", &self.path, &self.name))
                 .arg("commit")
@@ -214,7 +234,11 @@ impl GitRepo {
     }
     /// Tries to commit changes with a message argument.
     fn commit_with_msg(&self, msg: &str) -> bool {
-        if self.flags.contains(&RepoFlags::Commit) {
+        if self
+            .flags
+            .iter()
+            .any(|s| s == &RepoFlags::Commit || s == &RepoFlags::Quick || s == &RepoFlags::Fast)
+        {
             let output = Command::new("git")
                 .current_dir(format!("{}{}", &self.path, &self.name))
                 .arg("commit")
@@ -230,7 +254,11 @@ impl GitRepo {
     }
     /// Attempts to push the repository.
     fn push(&self) -> bool {
-        if self.flags.contains(&RepoFlags::Push) {
+        if self
+            .flags
+            .iter()
+            .any(|s| s == &RepoFlags::Push || s == &RepoFlags::Quick || s == &RepoFlags::Fast)
+        {
             let output = Command::new("git")
                 .current_dir(format!("{}{}", &self.path, &self.name))
                 .arg("push")
