@@ -1,20 +1,4 @@
 categories:
-  utils:
-    repos:
-      li:
-        name: li
-        path: /home/ces/org/src/git/
-        url: git@github.com:cafkafk/li.git
-        flags:
-        - Clone
-        - Push
-      gg:
-        name: gg
-        path: /home/ces/.dots/
-        url: git@github.com:cafkafk/gg.git
-        flags:
-        - Clone
-        - Push
   stuff:
     flags: []
     repos:
@@ -26,20 +10,36 @@ categories:
         name: gg
         path: /home/ces/.dots/
         url: git@github.com:cafkafk/gg.git
-  config:
-    flags: []
+  utils:
     repos:
-      qmk_firmware:
-        name: qmk_firmware
-        path: /home/ces/org/src/git/
-        url: git@github.com:cafkafk/qmk_firmware.git
+      gg:
+        name: gg
+        path: /home/ces/.dots/
+        url: git@github.com:cafkafk/gg.git
         flags:
         - Clone
         - Push
+      li:
+        name: li
+        path: /home/ces/org/src/git/
+        url: git@github.com:cafkafk/li.git
+        flags:
+        - Clone
+        - Push
+  config:
+    flags: []
+    repos:
       starship:
         name: starship
         path: /home/ces/org/src/git/
         url: https://github.com/starship/starship.git
+        flags:
+        - Clone
+        - Push
+      qmk_firmware:
+        name: qmk_firmware
+        path: /home/ces/org/src/git/
+        url: git@github.com:cafkafk/qmk_firmware.git
         flags:
         - Clone
         - Push
