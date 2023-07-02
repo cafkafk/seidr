@@ -5,11 +5,16 @@
 - [ ] Generic repositories
 - [ ] Version pinning
 - [ ] libgit2 (maybe)
+- [ ] Category Flags Finished
 * 0.1.0 [60%] [3/5]
 - [X] No functionality regressions
   - [X] commit works in quick, fast
   - [X] commit with edit works
 - [X] Repo Flags Finished
-- [ ] Category Flags Finished
 - [X] Optional Fields
 - [ ] Subcommands
+  - [ ] Quiet flag
+  - [ ] Do something about coc flag
+- [ ] UX
+  - [ ] Change failure emotes
+  - [ ] Flag for disabling emotes
