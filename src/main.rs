@@ -67,7 +67,7 @@ fn main() {
         args if args.warranty => println!("{}", utils::strings::INTERACTIVE_WARRANTY),
         args if args.code_of_conduct => println!("{}", utils::strings::INTERACTIVE_COC),
         args if args.quiet => settings::QUIET.store(true, Ordering::Relaxed),
-        args if args.no_emoji => settings::EMOJI.store(true, Ordering::Relaxed),
+        args if args.no_emoji => settings::EMOJIS.store(true, Ordering::Relaxed),
         _ => (),
     }
     match &mut args.command {
