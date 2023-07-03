@@ -12,6 +12,14 @@ All notable changes to this project will be documented in this file.
 
 - Added asciinema demo
 
+### Features
+
+- Added no-emoji flag
+
+### Miscellaneous Tasks
+
+- Bump to v0.1.1
+
 ## [0.1.0] - 2023-07-03
 
 ### Documentation
