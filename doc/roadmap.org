@@ -6,15 +6,16 @@
 - [ ] Version pinning
 - [ ] libgit2 (maybe)
 - [ ] Category Flags Finished
-* 0.1.0 [60%] [3/5]
+- [ ] Implement Quiet flag
+* 0.1.0 [80%] [4/5]
 - [X] No functionality regressions
   - [X] commit works in quick, fast
   - [X] commit with edit works
 - [X] Repo Flags Finished
 - [X] Optional Fields
-- [-] Subcommands
-  - [ ] Quiet flag
-  - [-] Do something about coc flag
+- [X] Subcommands
+  - [X] Quiet flag (wont rn)
+  - [X] Do something about coc flag
 - [ ] UX
   - [ ] Change failure emotes
   - [ ] Flag for disabling emotes
