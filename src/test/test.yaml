@@ -1,20 +1,4 @@
 categories:
-  utils:
-    repos:
-      gg:
-        name: gg
-        path: /home/ces/.dots/
-        url: git@github.com:cafkafk/gg.git
-        flags:
-        - Clone
-        - Push
-      li:
-        name: li
-        path: /home/ces/org/src/git/
-        url: git@github.com:cafkafk/li.git
-        flags:
-        - Clone
-        - Push
   config:
     flags: []
     repos:
@@ -43,6 +27,22 @@ categories:
         name: gg
         path: /home/ces/.dots/
         url: git@github.com:cafkafk/gg.git
+  utils:
+    repos:
+      gg:
+        name: gg
+        path: /home/ces/.dots/
+        url: git@github.com:cafkafk/gg.git
+        flags:
+        - Clone
+        - Push
+      li:
+        name: li
+        path: /home/ces/org/src/git/
+        url: git@github.com:cafkafk/li.git
+        flags:
+        - Clone
+        - Push
   empty: {}
 links:
 - name: gg
