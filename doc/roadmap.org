@@ -3,7 +3,7 @@
 * 0.2.0 (maybe)
 - [ ] Links in categories?
 * 0.1.2
-- [ ] Implement Quiet flag
+- [X] Implement Quiet flag
 * 0.1.1
 - [X] Implement no-emoji flag
 * 0.1.0 [100%] [5/5]
