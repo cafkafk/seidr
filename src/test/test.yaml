@@ -15,6 +15,7 @@ categories:
         flags:
         - Clone
         - Push
+  empty: {}
   stuff:
     flags: []
     repos:
@@ -29,13 +30,6 @@ categories:
   config:
     flags: []
     repos:
-      qmk_firmware:
-        name: qmk_firmware
-        path: /home/ces/org/src/git/
-        url: git@github.com:cafkafk/qmk_firmware.git
-        flags:
-        - Clone
-        - Push
       starship:
         name: starship
         path: /home/ces/org/src/git/
@@ -43,7 +37,13 @@ categories:
         flags:
         - Clone
         - Push
-  empty: {}
+      qmk_firmware:
+        name: qmk_firmware
+        path: /home/ces/org/src/git/
+        url: git@github.com:cafkafk/qmk_firmware.git
+        flags:
+        - Clone
+        - Push
 links:
 - name: gg
   rx: /home/ces/.config/gg

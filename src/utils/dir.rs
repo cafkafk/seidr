@@ -50,7 +50,7 @@ pub fn home_dir() -> String {
 ///
 /// WARNING: NOT THREAD SAFE
 fn change_dir_repo(path: &str, name: &str) {
-    let mut full_path: String = "".to_owned();
+    let mut full_path: String = String::new();
     full_path.push_str(path);
     full_path.push_str(name);
     let root = Path::new(&full_path);

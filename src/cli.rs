@@ -59,9 +59,17 @@ pub struct Args {
     #[arg(long)]
     pub warranty: bool,
 
-    /// Print code-of-conduct information (not implemented)
+    /// Print code-of-conduct information
     #[arg(long)]
     pub code_of_conduct: bool,
+
+    /// Try to be as quiet as possible (unix philosophy) (not imlemented)
+    #[arg(short, long)]
+    pub quiet: bool,
+
+    /// No emoji (not imlemented)
+    #[arg(short, long)]
+    pub no_emoji: bool,
 
     #[command(subcommand)]
     pub command: Option<Commands>,

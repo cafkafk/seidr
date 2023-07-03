@@ -61,7 +61,8 @@ fn main() {
     match &args {
         args if args.license => println!("{}", utils::strings::INTERACTIVE_LICENSE),
         args if args.warranty => println!("{}", utils::strings::INTERACTIVE_WARRANTY),
-        args if args.code_of_conduct => unimplemented!(),
+        args if args.code_of_conduct => println!("{}", utils::strings::INTERACTIVE_COC),
+        args if args.quiet => todo!(),
         _ => (),
     }
     match &mut args.command {
@@ -99,7 +100,7 @@ fn main() {
             config.commit_all();
         }
         Some(Commands::CommitMsg { msg }) => {
-            config.commit_all_msg(msg.as_ref().unwrap());
+            config.commit_all_msg(msg.as_ref().expect("failed to get message from input"));
         }
         None => (),
     }
@@ -154,8 +155,6 @@ mod config {
                     },
                 );
         }
-        // let yaml = serde_yaml::to_string(&config).unwrap();
-        // println!("{}", yaml);
     }
     #[test]
     fn read_config_populate() {
@@ -163,13 +162,13 @@ mod config {
     }
     #[test]
     fn write_config() {
-        let root = current_dir().unwrap();
+        let root = current_dir().expect("failed to get current dir");
         let config = Config::new(
             &RelativePath::new("./src/test/config.yaml")
                 .to_logical_path(&root)
                 .into_os_string()
                 .into_string()
-                .unwrap(),
+                .expect("failed to turn config into string"),
         );
 
         let mut test_file = File::create(
@@ -177,11 +176,13 @@ mod config {
                 .to_logical_path(&root)
                 .into_os_string()
                 .into_string()
-                .unwrap(),
+                .expect("failed to turn config into string"),
         )
         .expect("failed to create test file");
-        let contents = serde_yaml::to_string(&config).unwrap();
-        test_file.write_all(contents.as_bytes()).unwrap();
+        let contents = serde_yaml::to_string(&config).expect("failed to turn config into string");
+        test_file
+            .write_all(contents.as_bytes())
+            .expect("failed to write contents of config into file");
 
         let test_config = Config::new(&RelativePath::new("./src/test/test.yaml").to_string());
         assert_eq!(config, test_config);
@@ -205,13 +206,13 @@ mod config {
     }
     #[test]
     fn is_config_readable() {
-        let root = current_dir().unwrap();
+        let root = current_dir().expect("failed to get current dir");
         let config = Config::new(
             &RelativePath::new("./src/test/config.yaml")
                 .to_logical_path(root)
                 .into_os_string()
                 .into_string()
-                .unwrap(),
+                .expect("failed to turnn config into string"),
         );
 
         let flags = vec![Clone, Push];

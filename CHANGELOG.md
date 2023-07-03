@@ -2,6 +2,24 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.1.0] - 2023-07-03
+
+### Documentation
+
+- Changed roadmap
+- Updated roadmap
+
+### Features
+
+- Implemented CoC flag
+- Quiet flag
+- Made SUCCESS/FAILURE emoji const
+- Added flag no-emoji
+
+### Refactor
+
+- Made code more idiomatic
+
 ## [0.0.7] - 2023-07-02
 
 ### Bug Fixes

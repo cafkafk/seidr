@@ -25,6 +25,8 @@ use std::os::unix::fs::symlink;
 use std::path::Path;
 use std::{fs, process::Command};
 
+use crate::utils::strings::{FAILURE_EMOJI, SUCCESS_EMOJI};
+
 /// An enum containing flags that change behaviour of repos and categories
 #[derive(PartialOrd, Ord, PartialEq, Eq, Serialize, Deserialize, Debug)]
 pub enum RepoFlags {
@@ -53,7 +55,7 @@ pub enum RepoFlags {
 /// For diagrams of the underlying architecture, consult ARCHITECHTURE.md
 ///
 ///
-#[derive(PartialEq, Debug, Serialize, Deserialize)]
+#[derive(Eq, PartialEq, Debug, Serialize, Deserialize)]
 pub struct Config {
     /// map of all categories
     ///
@@ -66,7 +68,7 @@ pub struct Config {
 /// Represents a category of repositories
 ///
 /// This allows you to organize your repositories into categories
-#[derive(PartialEq, Debug, Serialize, Deserialize)]
+#[derive(Eq, PartialEq, Debug, Serialize, Deserialize)]
 pub struct Category {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub flags: Option<Vec<RepoFlags>>, // FIXME: not implemented
@@ -78,7 +80,7 @@ pub struct Category {
 }
 
 /// Contain fields for a single link.
-#[derive(PartialEq, Debug, Serialize, Deserialize)]
+#[derive(Eq, PartialEq, Debug, Serialize, Deserialize)]
 pub struct Links {
     /// The name of the link
     pub name: String,
@@ -87,7 +89,7 @@ pub struct Links {
 }
 
 /// Holds a single git repository and related fields.
-#[derive(PartialEq, Debug, Serialize, Deserialize)]
+#[derive(Eq, PartialEq, Debug, Serialize, Deserialize)]
 pub struct GitRepo {
     pub name: String,
     pub path: String,
@@ -101,7 +103,7 @@ pub struct GitRepo {
 ////////////////////////////////////
 
 /// Represents a single operation on a repository
-struct SeriesItem<'series> {
+pub struct SeriesItem<'series> {
     /// The string to be displayed to the user
     operation: &'series str,
     /// The closure representing the actual operation
@@ -114,7 +116,10 @@ struct SeriesItem<'series> {
 
 fn handle_file_exists(selff: &Links, tx_path: &Path, rx_path: &Path) {
     match rx_path.read_link() {
-        Ok(file) if file.canonicalize().unwrap() == tx_path.canonicalize().unwrap() => {
+        Ok(file)
+            if file.canonicalize().expect("failed to canonicalize file")
+                == tx_path.canonicalize().expect("failed to canonicalize path") =>
+        {
             debug!(
                 "Linking {} -> {} failed: file already linked",
                 &selff.tx, &selff.rx
@@ -291,7 +296,7 @@ impl GitRepo {
     /// Removes a repository (not implemented)
     ///
     /// Kept here as a reminder that we probably shouldn't do this
-    fn remove(&self) -> Result<(), std::io::Error> {
+    fn remove() -> Result<(), std::io::Error> {
         // https://doc.rust-lang.org/std/fs/fn.remove_dir_all.html
         unimplemented!("This seems to easy to missuse/exploit");
         // fs::remove_dir_all(format!("{}{}", &self.path, &self.name))
@@ -327,7 +332,7 @@ impl Config {
     where
         F: Fn(&GitRepo),
     {
-        for (_, category) in self.categories.iter() {
+        for category in self.categories.values() {
             for (_, repo) in category.repos.as_ref().expect("failed to get repos").iter() {
                 f(repo);
             }
@@ -342,14 +347,13 @@ impl Config {
     where
         F: Fn(&GitRepo) -> bool,
     {
-        for (_, category) in self.categories.iter() {
+        for category in self.categories.values() {
             for (_, repo) in category.repos.as_ref().expect("failed to get repos").iter() {
-                let mut sp =
-                    Spinner::new(Spinners::Dots10, format!("{}: {}", repo.name, op).into());
+                let mut sp = Spinner::new(Spinners::Dots10, format!("{}: {}", repo.name, op));
                 if f(repo) {
-                    sp.stop_and_persist("✔", format!("{}: {}", repo.name, op).into());
+                    sp.stop_and_persist(SUCCESS_EMOJI, format!("{}: {}", repo.name, op));
                 } else {
-                    sp.stop_and_persist("❎", format!("{}: {}", repo.name, op).into());
+                    sp.stop_and_persist(FAILURE_EMOJI, format!("{}: {}", repo.name, op));
                 }
             }
         }
@@ -396,17 +400,16 @@ impl Config {
     /// self.series_on_all(series);
     /// ```
     pub fn series_on_all(&self, closures: Vec<SeriesItem>) {
-        for (_, category) in self.categories.iter() {
+        for category in self.categories.values() {
             for (_, repo) in category.repos.as_ref().expect("failed to get repos").iter() {
-                for instruction in closures.iter() {
+                for instruction in &closures {
                     let f = &instruction.closure;
                     let op = instruction.operation;
-                    let mut sp =
-                        Spinner::new(Spinners::Dots10, format!("{}: {}", repo.name, op).into());
+                    let mut sp = Spinner::new(Spinners::Dots10, format!("{}: {}", repo.name, op));
                     if f(repo) {
-                        sp.stop_and_persist("✔", format!("{}: {}", repo.name, op).into());
+                        sp.stop_and_persist(SUCCESS_EMOJI, format!("{}: {}", repo.name, op));
                     } else {
-                        sp.stop_and_persist("❎", format!("{}: {}", repo.name, op).into());
+                        sp.stop_and_persist(FAILURE_EMOJI, format!("{}: {}", repo.name, op));
                         break;
                     }
                 }
@@ -443,17 +446,16 @@ impl Config {
     /// self.all_on_all(series);
     /// ```
     pub fn all_on_all(&self, closures: Vec<SeriesItem>) {
-        for (_, category) in self.categories.iter() {
+        for category in self.categories.values() {
             for (_, repo) in category.repos.as_ref().expect("failed to get repos").iter() {
-                for instruction in closures.iter() {
+                for instruction in &closures {
                     let f = &instruction.closure;
                     let op = instruction.operation;
-                    let mut sp =
-                        Spinner::new(Spinners::Dots10, format!("{}: {}", repo.name, op).into());
+                    let mut sp = Spinner::new(Spinners::Dots10, format!("{}: {}", repo.name, op));
                     if f(repo) {
-                        sp.stop_and_persist("✔", format!("{}: {}", repo.name, op).into());
+                        sp.stop_and_persist(SUCCESS_EMOJI, format!("{}: {}", repo.name, op));
                     } else {
-                        sp.stop_and_persist("❎", format!("{}: {}", repo.name, op).into());
+                        sp.stop_and_persist(FAILURE_EMOJI, format!("{}: {}", repo.name, op));
                     }
                 }
             }
@@ -465,22 +467,22 @@ impl Config {
     /// Tries to pull all repositories, skips if fail.
     pub fn pull_all(&self) {
         debug!("exectuting pull_all");
-        self.on_all_spinner("pull", |repo| repo.pull());
+        self.on_all_spinner("pull", GitRepo::pull);
     }
     /// Tries to clone all repositories, skips if fail.
     pub fn clone_all(&self) {
         debug!("exectuting clone_all");
-        self.on_all_spinner("clone", |repo| repo.clone());
+        self.on_all_spinner("clone", GitRepo::clone);
     }
     /// Tries to add all work in all repositories, skips if fail.
     pub fn add_all(&self) {
         debug!("exectuting clone_all");
-        self.on_all_spinner("add", |repo| repo.add_all());
+        self.on_all_spinner("add", GitRepo::add_all);
     }
     /// Tries to commit all repositories one at a time, skips if fail.
     pub fn commit_all(&self) {
         debug!("exectuting clone_all");
-        self.on_all_spinner("commit", |repo| repo.commit());
+        self.on_all_spinner("commit", GitRepo::commit);
     }
     /// Tries to commit all repositories with msg, skips if fail.
     pub fn commit_all_msg(&self, msg: &str) {
@@ -494,11 +496,11 @@ impl Config {
         let series: Vec<SeriesItem> = vec![
             SeriesItem {
                 operation: "pull",
-                closure: Box::new(move |repo: &GitRepo| repo.pull()),
+                closure: Box::new(GitRepo::pull),
             },
             SeriesItem {
                 operation: "add",
-                closure: Box::new(move |repo: &GitRepo| repo.add_all()),
+                closure: Box::new(GitRepo::add_all),
             },
             SeriesItem {
                 operation: "commit",
@@ -506,7 +508,7 @@ impl Config {
             },
             SeriesItem {
                 operation: "push",
-                closure: Box::new(move |repo: &GitRepo| repo.push()),
+                closure: Box::new(GitRepo::push),
             },
         ];
         self.all_on_all(series);
@@ -518,19 +520,19 @@ impl Config {
         let series: Vec<SeriesItem> = vec![
             SeriesItem {
                 operation: "pull",
-                closure: Box::new(move |repo: &GitRepo| repo.pull()),
+                closure: Box::new(GitRepo::pull),
             },
             SeriesItem {
                 operation: "add",
-                closure: Box::new(move |repo: &GitRepo| repo.add_all()),
+                closure: Box::new(GitRepo::add_all),
             },
             SeriesItem {
                 operation: "commit",
-                closure: Box::new(move |repo: &GitRepo| repo.commit()),
+                closure: Box::new(move |repo: &GitRepo| repo.commit_with_msg(msg)),
             },
             SeriesItem {
                 operation: "push",
-                closure: Box::new(move |repo: &GitRepo| repo.push()),
+                closure: Box::new(GitRepo::push),
             },
         ];
         self.series_on_all(series);
@@ -541,7 +543,7 @@ impl Config {
     /// Tries to link all repositories, skips if fail.
     pub fn link_all(&self) {
         debug!("exectuting link_all");
-        for link in self.links.iter() {
+        for link in &self.links {
             link.link();
         }
     }

@@ -9,15 +9,17 @@ those that use declarative operating systems and package managers.
 
 Although this isn't really a case where it matters *that* much for performance,
 being written in rust instead of e.g. /janky/ scripting languages does also mean
-it is snappy and reliable, and the /extensive/ testing helps ensure regressions
-aren't introduced.
+it is snappy and reliable, and the /extensive/ (hardly, but eventually) testing
+helps ensure regressions aren't introduced.
 
-That said, we're in 0.0.Z, *here be dragons* for now.
+That said, we're in 0.Y.Z, *here be dragons* for now (although a little less each
+commit).
 
 ** Installation
 #+begin_src sh
-$ git clone https://github.com/cafkafk/git
-$ ./install
+$ git clone https://github.com/cafkafk/gg
+$ cd gg
+$ cargo install --path .
 #+end_src
 
 ** Configuration
