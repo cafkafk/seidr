@@ -8,7 +8,7 @@
 - [ ] Category Flags Finished
 - [ ] Implement Quiet flag
 - [ ] Implement no-emoji flag
-* 0.1.0 [80%] [4/5]
+* 0.1.0 [100%] [5/5]
 - [X] No functionality regressions
   - [X] commit works in quick, fast
   - [X] commit with edit works
@@ -17,6 +17,6 @@
 - [X] Subcommands
   - [X] Quiet flag (wont rn)
   - [X] Do something about coc flag
-- [-] UX
+- [X] UX
   - [X] Change failure emotes
-  - [ ] Flag for disabling emotes
+  - [X] Flag for disabling emotes

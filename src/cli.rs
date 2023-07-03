@@ -67,6 +67,10 @@ pub struct Args {
     #[arg(short, long)]
     pub quiet: bool,
 
+    /// No emoji (not imlemented)
+    #[arg(short, long)]
+    pub no_emoji: bool,
+
     #[command(subcommand)]
     pub command: Option<Commands>,
 }
