@@ -7,6 +7,8 @@ with "dotfiles", and with git support as a first class feature. Configuration is
 done throug a single yaml file, giving it a paradigm that should bring joy to
 those that use declarative operating systems and package managers.
 
+#+HTML: <a href="https://asciinema.org/a/TVmnEYR3PK40GtoZnwavun0dP" target="_blank"><img src="https://asciinema.org/a/TVmnEYR3PK40GtoZnwavun0dP.svg" /></a>
+
 Although this isn't really a case where it matters *that* much for performance,
 being written in rust instead of e.g. /janky/ scripting languages does also mean
 it is snappy and reliable, and the /extensive/ (hardly, but eventually) testing
