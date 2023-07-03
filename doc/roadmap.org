@@ -1,12 +1,8 @@
 #+title: Roadmap
 
-* Roadmap [0%] [0/4]
-- [ ] Custom operation sequences
-- [ ] Generic repositories
-- [ ] Version pinning
-- [ ] libgit2 (maybe)
-- [ ] Category Flags Finished
+* 0.1.2
 - [ ] Implement Quiet flag
+* 0.1.1
 - [ ] Implement no-emoji flag
 * 0.1.0 [100%] [5/5]
 - [X] No functionality regressions
@@ -20,3 +16,10 @@
 - [X] UX
   - [X] Change failure emotes
   - [X] Flag for disabling emotes
+
+* Roadmap [0%] [0/4]
+- [ ] Custom operation sequences
+- [ ] Generic repositories
+- [ ] Version pinning
+- [ ] libgit2 (maybe)
+- [ ] Category Flags Finished
