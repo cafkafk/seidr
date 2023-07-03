@@ -1,4 +1,5 @@
 categories:
+  empty: {}
   stuff:
     flags: []
     repos:
@@ -43,7 +44,6 @@ categories:
         flags:
         - Clone
         - Push
-  empty: {}
 links:
 - name: gg
   rx: /home/ces/.config/gg

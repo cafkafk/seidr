@@ -61,7 +61,7 @@ fn main() {
     match &args {
         args if args.license => println!("{}", utils::strings::INTERACTIVE_LICENSE),
         args if args.warranty => println!("{}", utils::strings::INTERACTIVE_WARRANTY),
-        args if args.code_of_conduct => unimplemented!(),
+        args if args.code_of_conduct => println!("{}", utils::strings::INTERACTIVE_COC),
         _ => (),
     }
     match &mut args.command {

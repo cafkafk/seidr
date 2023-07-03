@@ -46,6 +46,14 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 ";
 
+pub const INTERACTIVE_COC: &str = "\
+In the interest of fostering an open and welcoming environment, we as
+contributors and maintainers pledge to making participation in our project and
+our community a harassment-free experience for everyone, regardless of age, body
+size, disability, ethnicity, gender identity and expression, level of
+experience, nationality, personal appearance, race, religion, or sexual identity
+and orientation. For more, see http://contributor-covenant.org/version/1/4";
+
 /// Contains the message for quick commit subcommand
 pub const QUICK_COMMIT: &str = "git: quick commit";
 

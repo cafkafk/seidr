@@ -12,9 +12,9 @@
   - [X] commit with edit works
 - [X] Repo Flags Finished
 - [X] Optional Fields
-- [ ] Subcommands
+- [-] Subcommands
   - [ ] Quiet flag
-  - [ ] Do something about coc flag
+  - [-] Do something about coc flag
 - [ ] UX
   - [ ] Change failure emotes
   - [ ] Flag for disabling emotes
