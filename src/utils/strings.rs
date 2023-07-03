@@ -59,3 +59,9 @@ pub const QUICK_COMMIT: &str = "git: quick commit";
 
 /// Contains the message for fast commit subcommand
 pub const FAST_COMMIT: &str = "git: fast commit";
+
+/// Success emoji
+pub const SUCCESS_EMOJI: &str = "✔";
+
+/// Failure emoji
+pub const FAILURE_EMOJI: &str = "❌";
