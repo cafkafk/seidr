@@ -22,11 +22,11 @@
 /// Contains the notice for interactive programs from the GPLv3's "How to Apply
 /// These Terms to Your New Programs"
 pub const INTERACTIVE_NOTICE: &str = "\
-gg  Copyright (C) 2023  Christina Sørensen <christina@cafkafk.com>
-This program comes with ABSOLUTELY NO WARRANTY; for details type `gg --warranty'.
-This is free software, and you are welcome to redistribute it
-under certain conditions; type `gg --license' for details.
-";
+gg Copyright (C) 2023 Christina Sørensen <cafkafk.com>
+
+This program comes with ABSOLUTELY NO WARRANTY; for details type `gg
+--warranty'. This is free software, and you are welcome to redistribute it under
+certain conditions; type `gg --license' for details. ";
 
 /// Contains the license part of the long notice for interactive programs from
 /// the GPLv3's "How to Apply These Terms to Your New Programs"
