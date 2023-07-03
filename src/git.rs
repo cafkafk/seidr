@@ -25,7 +25,7 @@ use std::os::unix::fs::symlink;
 use std::path::Path;
 use std::{fs, process::Command};
 
-use crate::utils::strings::{FAILURE_EMOJI, SUCCESS_EMOJI};
+use crate::utils::strings::{failure_str, success_str};
 
 /// An enum containing flags that change behaviour of repos and categories
 #[derive(PartialOrd, Ord, PartialEq, Eq, Serialize, Deserialize, Debug)]
@@ -351,9 +351,9 @@ impl Config {
             for (_, repo) in category.repos.as_ref().expect("failed to get repos").iter() {
                 let mut sp = Spinner::new(Spinners::Dots10, format!("{}: {}", repo.name, op));
                 if f(repo) {
-                    sp.stop_and_persist(SUCCESS_EMOJI, format!("{}: {}", repo.name, op));
+                    sp.stop_and_persist(success_str(), format!("{}: {}", repo.name, op));
                 } else {
-                    sp.stop_and_persist(FAILURE_EMOJI, format!("{}: {}", repo.name, op));
+                    sp.stop_and_persist(failure_str(), format!("{}: {}", repo.name, op));
                 }
             }
         }
@@ -407,9 +407,9 @@ impl Config {
                     let op = instruction.operation;
                     let mut sp = Spinner::new(Spinners::Dots10, format!("{}: {}", repo.name, op));
                     if f(repo) {
-                        sp.stop_and_persist(SUCCESS_EMOJI, format!("{}: {}", repo.name, op));
+                        sp.stop_and_persist(success_str(), format!("{}: {}", repo.name, op));
                     } else {
-                        sp.stop_and_persist(FAILURE_EMOJI, format!("{}: {}", repo.name, op));
+                        sp.stop_and_persist(failure_str(), format!("{}: {}", repo.name, op));
                         break;
                     }
                 }
@@ -453,9 +453,9 @@ impl Config {
                     let op = instruction.operation;
                     let mut sp = Spinner::new(Spinners::Dots10, format!("{}: {}", repo.name, op));
                     if f(repo) {
-                        sp.stop_and_persist(SUCCESS_EMOJI, format!("{}: {}", repo.name, op));
+                        sp.stop_and_persist(success_str(), format!("{}: {}", repo.name, op));
                     } else {
-                        sp.stop_and_persist(FAILURE_EMOJI, format!("{}: {}", repo.name, op));
+                        sp.stop_and_persist(failure_str(), format!("{}: {}", repo.name, op));
                     }
                 }
             }

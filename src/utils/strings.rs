@@ -19,6 +19,10 @@
 //! Ideally, at a VERY long term scale, this should be a nice pattern for
 //! possible translations.
 
+use std::sync::atomic::Ordering;
+
+use crate::settings;
+
 /// Contains the notice for interactive programs from the GPLv3's "How to Apply
 /// These Terms to Your New Programs"
 pub const INTERACTIVE_NOTICE: &str = "\
@@ -65,3 +69,25 @@ pub const SUCCESS_EMOJI: &str = "✔";
 
 /// Failure emoji
 pub const FAILURE_EMOJI: &str = "❌";
+
+/// Success string
+pub const SUCCESS_STRING: &str = "SUCC";
+
+/// Failure string
+pub const FAILURE_STRING: &str = "FAIL";
+
+pub fn success_str() -> &'static str {
+    if settings::EMOJIS.load(Ordering::Relaxed) {
+        SUCCESS_EMOJI
+    } else {
+        SUCCESS_STRING
+    }
+}
+
+pub fn failure_str() -> &'static str {
+    if settings::EMOJIS.load(Ordering::Relaxed) {
+        FAILURE_EMOJI
+    } else {
+        FAILURE_STRING
+    }
+}
