@@ -24,13 +24,14 @@ use clap::{ArgAction, CommandFactory, Parser, Subcommand};
 const CONFIG_FILE: &str = "/.config/gg/config.yaml";
 
 const HELP_TEMPLATE: &str = "\
-    {before-help}{name} {version}
-    {author-with-newline}{about-with-newline}
-    {usage-heading} {usage}
+{before-help}{name} {version}
+{about-with-newline}
 
-    {all-args}{after-help}
+{usage-heading} {usage}
 
-    ";
+{all-args}{after-help}
+
+";
 
 //#[clap(author, version, about, long_about = None)]
 #[derive(Parser, Debug)]
