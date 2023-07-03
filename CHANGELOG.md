@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.1.1] - 2023-07-03
+
+### Bug Fixes
+
+- Fixed help formatting
+
+### Documentation
+
+- Added asciinema demo
+
 ## [0.1.0] - 2023-07-03
 
 ### Documentation
@@ -15,6 +25,10 @@ All notable changes to this project will be documented in this file.
 - Quiet flag
 - Made SUCCESS/FAILURE emoji const
 - Added flag no-emoji
+
+### Miscellaneous Tasks
+
+- Bump v0.1.0, housekeeping
 
 ### Refactor
 

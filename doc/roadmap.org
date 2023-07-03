@@ -5,7 +5,7 @@
 * 0.1.2
 - [ ] Implement Quiet flag
 * 0.1.1
-- [ ] Implement no-emoji flag
+- [X] Implement no-emoji flag
 * 0.1.0 [100%] [5/5]
 - [X] No functionality regressions
   - [X] commit works in quick, fast
