@@ -36,10 +36,12 @@ categories:
         name: li
         path: /home/ces/org/src/git/
         url: git@github.com:cafkafk/li.git
-links:
-  - name: gg
-    rx: /home/ces/.config/gg
-    tx: /home/ces/.dots/gg
-  - name: starship
-    rx: /home/ces/.config/starship.toml
-    tx: /home/ces/.dots/starship.toml
+    links:
+      gg:
+        name: gg
+        rx: /home/ces/.config/gg
+        tx: /home/ces/.dots/gg
+      starship:
+        name: starship
+        rx: /home/ces/.config/starship.toml
+        tx: /home/ces/.dots/starship.toml

@@ -116,7 +116,7 @@ fn main() {
 mod config {
     use crate::*;
     use git::RepoFlags::{Clone, Push};
-    use git::{Category, GitRepo};
+    use git::{Category, GitRepo, Link};
     use relative_path::RelativePath;
     use std::collections::HashMap;
     use std::env::current_dir;
@@ -126,7 +126,6 @@ mod config {
     fn init_config() {
         let _config = Config {
             categories: HashMap::new(),
-            links: vec![],
         };
     }
     #[test]
@@ -134,10 +133,10 @@ mod config {
         let default_category = Category {
             flags: Some(vec![]),
             repos: Some(HashMap::new()),
+            links: Some(HashMap::new()),
         };
         let mut config = Config {
             categories: HashMap::new(),
-            links: vec![],
         };
         config
             .categories
@@ -192,6 +191,7 @@ mod config {
         let test_config = Config::new(&RelativePath::new("./src/test/test.yaml").to_string());
         assert_eq!(config, test_config);
     }
+    #[allow(dead_code)]
     fn get_category<'cat>(config: &'cat Config, name: &'cat str) -> &'cat Category {
         config.categories.get(name).expect("failed to get category")
     }
@@ -209,6 +209,20 @@ mod config {
             .get(repo_name)
             .expect("failed to get category"))
     }
+    fn get_link<F>(config: &Config, cat_name: &str, link_name: &str, f: F)
+    where
+        F: FnOnce(&Link),
+    {
+        f(config
+            .categories
+            .get(cat_name)
+            .expect("failed to get category")
+            .links
+            .as_ref()
+            .expect("failed to get repo")
+            .get(link_name)
+            .expect("failed to get category"))
+    }
     #[test]
     fn is_config_readable() {
         let root = current_dir().expect("failed to get current dir");
@@ -220,7 +234,7 @@ mod config {
                 .expect("failed to turnn config into string"),
         );
 
-        let flags = vec![Clone, Push];
+        let _flags = vec![Clone, Push];
         // FIXME not very extensive
         #[allow(clippy::bool_assert_comparison)]
         {
@@ -228,8 +242,14 @@ mod config {
                 assert_eq!(repo.name, "qmk_firmware");
                 assert_eq!(repo.path, "/home/ces/org/src/git/");
                 assert_eq!(repo.url, "git@github.com:cafkafk/qmk_firmware.git");
-            })
+            });
+            get_link(&config, "stuff", "gg", |link| {
+                assert_eq!(link.name, "gg");
+                assert_eq!(link.tx, "/home/ces/.dots/gg");
+                assert_eq!(link.rx, "/home/ces/.config/gg");
+            });
         }
+        /*
         {
             assert_eq!(config.links[0].name, "gg");
             assert_eq!(config.links[0].rx, "/home/ces/.config/gg");
@@ -238,7 +258,7 @@ mod config {
             assert_eq!(config.links[1].rx, "/home/ces/.config/starship.toml");
             assert_eq!(config.links[1].tx, "/home/ces/.dots/starship.toml");
             // FIXME doesn't check repoflags
-        }
+        }*/
     }
 }
 
