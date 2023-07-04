@@ -1,7 +1,9 @@
 #+title: Roadmap
 
 * 0.2.0 (maybe)
-- [ ] Links in categories?
+- [-] Links in categories?
+- [ ] Fix category with no links
+- [ ] Refactor
 * 0.1.2
 - [X] Implement Quiet flag
 * 0.1.1

@@ -62,8 +62,6 @@ pub struct Config {
     ///
     /// Key should conceptually be seen as the name of the category.
     pub categories: HashMap<String, Category>,
-    /// A vector containing links
-    pub links: Vec<Links>,
 }
 
 /// Represents a category of repositories
@@ -73,16 +71,22 @@ pub struct Config {
 pub struct Category {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub flags: Option<Vec<RepoFlags>>, // FIXME: not implemented
-    /// map of all categories
+    /// map of all repos in category
     ///
     /// Key should conceptually be seen as the name of the category.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub repos: Option<HashMap<String, GitRepo>>,
+
+    /// map of all links in category
+    ///
+    /// Key should conceptually be seen as the name of the category.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub links: Option<HashMap<String, Link>>,
 }
 
 /// Contain fields for a single link.
 #[derive(Eq, PartialEq, Debug, Serialize, Deserialize)]
-pub struct Links {
+pub struct Link {
     /// The name of the link
     pub name: String,
     pub rx: String,
@@ -115,7 +119,7 @@ pub struct SeriesItem<'series> {
 ////////////////////////////////////
 ////////////////////////////////////
 
-fn handle_file_exists(selff: &Links, tx_path: &Path, rx_path: &Path) {
+fn handle_file_exists(selff: &Link, tx_path: &Path, rx_path: &Path) -> bool {
     match rx_path.read_link() {
         Ok(file)
             if file.canonicalize().expect("failed to canonicalize file")
@@ -125,22 +129,25 @@ fn handle_file_exists(selff: &Links, tx_path: &Path, rx_path: &Path) {
                 "Linking {} -> {} failed: file already linked",
                 &selff.tx, &selff.rx
             );
+            false
         }
         Ok(file) => {
             error!(
                 "Linking {} -> {} failed: link to different file exists",
                 &selff.tx, &selff.rx
             );
+            false
         }
         Err(error) => {
             error!("Linking {} -> {} failed: file exists", &selff.tx, &selff.rx);
+            false
         }
     }
 }
 
-impl Links {
+impl Link {
     /// Creates the link from the link struct
-    pub fn link(&self) {
+    pub fn link(&self) -> bool {
         let tx_path: &Path = std::path::Path::new(&self.tx);
         let rx_path: &Path = std::path::Path::new(&self.rx);
         match rx_path.try_exists() {
@@ -150,14 +157,17 @@ impl Links {
                     "Linking {} -> {} failed: broken symlink",
                     &self.tx, &self.rx
                 );
+                false
             }
             Ok(false) => {
                 symlink(&self.tx, &self.rx).expect("failed to create link");
+                true
             }
             Err(error) => {
                 error!("Linking {} -> {} failed: {}", &self.tx, &self.rx, error);
+                false
             }
-        };
+        }
     }
 }
 
@@ -363,6 +373,38 @@ impl Config {
             }
         }
     }
+    /// Runs associated function on all links in config
+    fn on_all_links_spinner<F>(&self, op: &str, f: F)
+    where
+        F: Fn(&Link) -> bool,
+    {
+        for category in self.categories.values() {
+            match category.links.as_ref() {
+                Some(links) => {
+                    for (_, link) in links.iter() {
+                        if !settings::QUIET.load(std::sync::atomic::Ordering::Relaxed) {
+                            let mut sp =
+                                Spinner::new(Spinners::Dots10, format!("{}: {}", link.name, op));
+                            if f(link) {
+                                sp.stop_and_persist(
+                                    success_str(),
+                                    format!("{}: {}", link.name, op),
+                                );
+                            } else {
+                                sp.stop_and_persist(
+                                    failure_str(),
+                                    format!("{}: {}", link.name, op),
+                                );
+                            }
+                        } else {
+                            f(link);
+                        }
+                    }
+                }
+                None => continue,
+            };
+        }
+    }
     /// Runs associated function on all repos in config
     ///
     /// TODO: need to be made over a generic repo type
@@ -558,8 +600,6 @@ impl Config {
     /// Tries to link all repositories, skips if fail.
     pub fn link_all(&self) {
         debug!("exectuting link_all");
-        for link in &self.links {
-            link.link();
-        }
+        self.on_all_links_spinner("link", Link::link);
     }
 }
