@@ -77,17 +77,17 @@ pub const SUCCESS_STRING: &str = "SUCC";
 pub const FAILURE_STRING: &str = "FAIL";
 
 pub fn success_str() -> &'static str {
-    if !settings::EMOJIS.load(Ordering::Relaxed) {
-        SUCCESS_EMOJI
-    } else {
+    if settings::EMOJIS.load(Ordering::Relaxed) {
         SUCCESS_STRING
+    } else {
+        SUCCESS_EMOJI
     }
 }
 
 pub fn failure_str() -> &'static str {
-    if !settings::EMOJIS.load(Ordering::Relaxed) {
-        FAILURE_EMOJI
-    } else {
+    if settings::EMOJIS.load(Ordering::Relaxed) {
         FAILURE_STRING
+    } else {
+        FAILURE_EMOJI
     }
 }
