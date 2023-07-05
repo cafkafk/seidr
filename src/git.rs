@@ -507,6 +507,34 @@ impl Config {
             }
         }
     }
+    pub fn get_repo<F>(&self, cat_name: &str, repo_name: &str, f: F)
+    where
+        F: FnOnce(&GitRepo),
+    {
+        f(&self
+            .categories
+            .get(cat_name)
+            .expect("failed to get category")
+            .repos
+            .as_ref()
+            .expect("failed to get repo")
+            .get(repo_name)
+            .expect("failed to get category"))
+    }
+    pub fn get_link<F>(&self, cat_name: &str, link_name: &str, f: F)
+    where
+        F: FnOnce(&Link),
+    {
+        f(&self
+            .categories
+            .get(cat_name)
+            .expect("failed to get category")
+            .links
+            .as_ref()
+            .expect("failed to get repo")
+            .get(link_name)
+            .expect("failed to get category"))
+    }
     //////////////////////////////////////////////////////////////
     //////////////////////////////////////////////////////////////
     //////////////////////////////////////////////////////////////

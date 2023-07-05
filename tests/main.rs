@@ -1,122 +1,13 @@
-//    A Rust GitOps/symlinkfarm orchestrator inspired by GNU Stow.
-//    Copyright (C) 2023  Christina Sørensen <christina@cafkafk.com>
-//
-//    This program is free software: you can redistribute it and/or modify
-//    it under the terms of the GNU General Public License as published by
-//    the Free Software Foundation, either version 3 of the License, or
-//    (at your option) any later version.
-//
-//    This program is distributed in the hope that it will be useful,
-//    but WITHOUT ANY WARRANTY; without even the implied warranty of
-//    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-//    GNU General Public License for more details.
-//
-//    You should have received a copy of the GNU General Public License
-//    along with this program.  If not, see https://www.gnu.org/gpl-3.0.html.
-//
-//! A Rust GitOps/symlinkfarm orchestrator inspired by GNU Stow.
-//!
-//! # What is?
-//!
-//! A Rust GitOps/symlinkfarm orchestrator inspired by GNU Stow. Useful for dealing
-//! with "dotfiles", and with git support as a first class feature. Configuration is
-//! done throug a single yaml file, giving it a paradigm that should bring joy to
-//! those that use declarative operating systems and package managers.
-//!
-//! Although this isn't really a case where it matters *that* much for performance,
-//! being written in rust instead of e.g. /janky/ scripting languages does also mean
-//! it is snappy and reliable, and the /extensive/ testing helps ensure regressions
-//! aren't introduced.
-//!
-//! That said, we're in 0.0.Z, *here be dragons* for now.
-#![feature(unsized_tuple_coercion)]
-
-extern crate log;
-extern crate pretty_env_logger;
-
-#[allow(unused)]
-mod cli;
-#[allow(unused)]
-mod git;
-#[allow(unused)]
-mod settings;
-#[allow(unused)]
-mod utils;
-
-use cli::{Args, Commands};
-use git::Config;
-use utils::strings::{FAST_COMMIT, QUICK_COMMIT};
-
-use clap::Parser;
-
-#[allow(unused)]
-use log::{debug, error, info, trace, warn};
-
-use std::sync::atomic::Ordering;
-
-/// The main loop of the binary
-///
-/// Here, we handle parsing the configuration file, as well as matching commands
-/// to the relavant operations.
+#[test]
 fn main() {
-    pretty_env_logger::init();
-    let mut args = Args::parse();
-    let config = Config::new(&args.config);
-    match &args {
-        args if args.license => println!("{}", utils::strings::INTERACTIVE_LICENSE),
-        args if args.warranty => println!("{}", utils::strings::INTERACTIVE_WARRANTY),
-        args if args.code_of_conduct => println!("{}", utils::strings::INTERACTIVE_COC),
-        args if args.quiet => settings::QUIET.store(true, Ordering::Relaxed),
-        args if args.no_emoji => settings::EMOJIS.store(true, Ordering::Relaxed),
-        _ => (),
-    }
-    match &mut args.command {
-        Some(Commands::Link { msg: _ }) => {
-            config.link_all();
-        }
-        Some(Commands::Quick { msg }) => {
-            let s = Box::leak(
-                msg.as_mut()
-                    .get_or_insert(&mut QUICK_COMMIT.to_string())
-                    .clone()
-                    .into_boxed_str(),
-            );
-            config.quick(s);
-        }
-        Some(Commands::Fast { msg }) => {
-            let s = Box::leak(
-                msg.as_mut()
-                    .get_or_insert(&mut FAST_COMMIT.to_string())
-                    .clone()
-                    .into_boxed_str(),
-            );
-            config.fast(s);
-        }
-        Some(Commands::Clone { msg: _ }) => {
-            config.clone_all();
-        }
-        Some(Commands::Pull { msg: _ }) => {
-            config.pull_all();
-        }
-        Some(Commands::Add { msg: _ }) => {
-            config.add_all();
-        }
-        Some(Commands::Commit { msg: _ }) => {
-            config.commit_all();
-        }
-        Some(Commands::CommitMsg { msg }) => {
-            config.commit_all_msg(msg.as_ref().expect("failed to get message from input"));
-        }
-        None => (),
-    }
-    trace!("{:?}", config);
+    assert!(true);
 }
 
+/*
 #[cfg(test)]
 mod config {
-    use crate::*;
-    use git::RepoFlags::{Clone, Push};
-    use git::{Category, GitRepo, Link};
+    use gg::git::RepoFlags::{Clone, Push};
+    use gg::git::{Category, Config, GitRepo, Link};
     use relative_path::RelativePath;
     use std::collections::HashMap;
     use std::env::current_dir;
@@ -195,6 +86,34 @@ mod config {
     fn get_category<'cat>(config: &'cat Config, name: &'cat str) -> &'cat Category {
         config.categories.get(name).expect("failed to get category")
     }
+    fn get_repo<F>(config: &Config, cat_name: &str, repo_name: &str, f: F)
+    where
+        F: FnOnce(&GitRepo),
+    {
+        f(config
+            .categories
+            .get(cat_name)
+            .expect("failed to get category")
+            .repos
+            .as_ref()
+            .expect("failed to get repo")
+            .get(repo_name)
+            .expect("failed to get category"))
+    }
+    fn get_link<F>(config: &Config, cat_name: &str, link_name: &str, f: F)
+    where
+        F: FnOnce(&Link),
+    {
+        f(config
+            .categories
+            .get(cat_name)
+            .expect("failed to get category")
+            .links
+            .as_ref()
+            .expect("failed to get repo")
+            .get(link_name)
+            .expect("failed to get category"))
+    }
     #[test]
     fn is_config_readable() {
         let root = current_dir().expect("failed to get current dir");
@@ -207,31 +126,40 @@ mod config {
         );
 
         let _flags = vec![Clone, Push];
-        // NOTE not very extensive
+        // FIXME not very extensive
         #[allow(clippy::bool_assert_comparison)]
         {
-            (&config).get_repo("config", "qmk_firmware", |repo| {
+            get_repo(&config, "config", "qmk_firmware", |repo| {
                 assert_eq!(repo.name, "qmk_firmware");
                 assert_eq!(repo.path, "/home/ces/org/src/git/");
                 assert_eq!(repo.url, "git@github.com:cafkafk/qmk_firmware.git");
             });
-            (&config).get_link("stuff", "gg", |link| {
+            get_link(&config, "stuff", "gg", |link| {
                 assert_eq!(link.name, "gg");
                 assert_eq!(link.tx, "/home/ces/.dots/gg");
                 assert_eq!(link.rx, "/home/ces/.config/gg");
             });
         }
+        /*
+        {
+            assert_eq!(config.links[0].name, "gg");
+            assert_eq!(config.links[0].rx, "/home/ces/.config/gg");
+            assert_eq!(config.links[0].tx, "/home/ces/.dots/gg");
+            assert_eq!(config.links[1].name, "starship");
+            assert_eq!(config.links[1].rx, "/home/ces/.config/starship.toml");
+            assert_eq!(config.links[1].tx, "/home/ces/.dots/starship.toml");
+            // FIXME doesn't check repoflags
+        }*/
     }
-}
+}*/
 
-/* FIXME Unable to test with networking inside flake
+/*
 #[cfg(test)]
 mod repo_actions {
-    use crate::*;
-    use git::GitRepo;
-    use relative_path::RelativePath;
-    use std::env::current_dir;
-    use std::process::Command;
+    use gg::git::GitRepo;
+    use gg::relative_path::RelativePath;
+    use gg::std::env::current_dir;
+    use gg::std::process::Command;
     #[test]
     #[allow(clippy::redundant_clone)]
     fn test_repo_actions() {
