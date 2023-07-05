@@ -315,7 +315,6 @@ impl GitRepo {
 }
 
 impl Config {
-    /* GIT RELATED */
     /// Loads the configuration toml from a path in to the Config struct.
     pub fn new(path: &String) -> Self {
         debug!("initializing new Config struct");
@@ -330,15 +329,9 @@ impl Config {
             )
         })
     }
-    //////////////////////////////////////////////////////////////
-    //////////////////////////////////////////////////////////////
-    //////////////////////////////////////////////////////////////
     /// Runs associated function on all repos in config
     ///
-    /// TODO: need to be made over a generic repo type
-    ///
     /// NOTE: currently unused
-    ///
     fn on_all<F>(&self, f: F)
     where
         F: Fn(&GitRepo),
@@ -350,10 +343,6 @@ impl Config {
         }
     }
     /// Runs associated function on all repos in config
-    ///
-    /// TODO: need to be made over a generic repo type
-    ///
-    ///
     fn on_all_spinner<F>(&self, op: &str, f: F)
     where
         F: Fn(&GitRepo) -> bool,
@@ -381,7 +370,7 @@ impl Config {
         for category in self.categories.values() {
             match category.links.as_ref() {
                 Some(links) => {
-                    for (_, link) in links.iter() {
+                    for link in links.values() {
                         if !settings::QUIET.load(std::sync::atomic::Ordering::Relaxed) {
                             let mut sp =
                                 Spinner::new(Spinners::Dots10, format!("{}: {}", link.name, op));
