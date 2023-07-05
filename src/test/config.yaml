@@ -45,3 +45,14 @@ categories:
         name: starship
         rx: /home/ces/.config/starship.toml
         tx: /home/ces/.dots/starship.toml
+  fluff:
+    flags: []
+    links:
+      gg:
+        name: gg
+        rx: /home/ces/.config/gg
+        tx: /home/ces/.dots/gg
+      starship:
+        name: starship
+        rx: /home/ces/.config/starship.toml
+        tx: /home/ces/.dots/starship.toml

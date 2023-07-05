@@ -342,24 +342,56 @@ impl Config {
             }
         }
     }
+    // /// Runs associated function on all repos in config
+    // fn on_all_spinner<F>(&self, op: &str, f: F)
+    // where
+    //     F: Fn(&GitRepo) -> bool,
+    // {
+    //     for category in self.categories.values() {
+    //         for (_, repo) in category.repos.as_ref().expect("failed to get repos").iter() {
+    //             if !settings::QUIET.load(std::sync::atomic::Ordering::Relaxed) {
+    //                 let mut sp = Spinner::new(Spinners::Dots10, format!("{}: {}", repo.name, op));
+    //                 if f(repo) {
+    //                     sp.stop_and_persist(success_str(), format!("{}: {}", repo.name, op));
+    //                 } else {
+    //                     sp.stop_and_persist(failure_str(), format!("{}: {}", repo.name, op));
+    //                 }
+    //             } else {
+    //                 f(repo);
+    //             }
+    //         }
+    //     }
+    // }
     /// Runs associated function on all repos in config
-    fn on_all_spinner<F>(&self, op: &str, f: F)
+    fn on_all_repos_spinner<F>(&self, op: &str, f: F)
     where
         F: Fn(&GitRepo) -> bool,
     {
         for category in self.categories.values() {
-            for (_, repo) in category.repos.as_ref().expect("failed to get repos").iter() {
-                if !settings::QUIET.load(std::sync::atomic::Ordering::Relaxed) {
-                    let mut sp = Spinner::new(Spinners::Dots10, format!("{}: {}", repo.name, op));
-                    if f(repo) {
-                        sp.stop_and_persist(success_str(), format!("{}: {}", repo.name, op));
-                    } else {
-                        sp.stop_and_persist(failure_str(), format!("{}: {}", repo.name, op));
+            match category.repos.as_ref() {
+                Some(repos) => {
+                    for repo in repos.values() {
+                        if !settings::QUIET.load(std::sync::atomic::Ordering::Relaxed) {
+                            let mut sp =
+                                Spinner::new(Spinners::Dots10, format!("{}: {}", repo.name, op));
+                            if f(repo) {
+                                sp.stop_and_persist(
+                                    success_str(),
+                                    format!("{}: {}", repo.name, op),
+                                );
+                            } else {
+                                sp.stop_and_persist(
+                                    failure_str(),
+                                    format!("{}: {}", repo.name, op),
+                                );
+                            }
+                        } else {
+                            f(repo);
+                        }
                     }
-                } else {
-                    f(repo);
                 }
-            }
+                None => continue,
+            };
         }
     }
     /// Runs associated function on all links in config
@@ -541,27 +573,27 @@ impl Config {
     /// Tries to pull all repositories, skips if fail.
     pub fn pull_all(&self) {
         debug!("exectuting pull_all");
-        self.on_all_spinner("pull", GitRepo::pull);
+        self.on_all_repos_spinner("pull", GitRepo::pull);
     }
-    /// Tries to clone all repositories, skips if fail.
+    /// Tries to clone all repossitories, skips if fail.
     pub fn clone_all(&self) {
         debug!("exectuting clone_all");
-        self.on_all_spinner("clone", GitRepo::clone);
+        self.on_all_repos_spinner("clone", GitRepo::clone);
     }
-    /// Tries to add all work in all repositories, skips if fail.
+    /// Tries to add all work in all repossitories, skips if fail.
     pub fn add_all(&self) {
         debug!("exectuting clone_all");
-        self.on_all_spinner("add", GitRepo::add_all);
+        self.on_all_repos_spinner("add", GitRepo::add_all);
     }
-    /// Tries to commit all repositories one at a time, skips if fail.
+    /// Tries to commit all repossitories one at a time, skips if fail.
     pub fn commit_all(&self) {
         debug!("exectuting clone_all");
-        self.on_all_spinner("commit", GitRepo::commit);
+        self.on_all_repos_spinner("commit", GitRepo::commit);
     }
-    /// Tries to commit all repositories with msg, skips if fail.
+    /// Tries to commit all repossitories with msg, skips if fail.
     pub fn commit_all_msg(&self, msg: &str) {
         debug!("exectuting clone_all");
-        self.on_all_spinner("commit", |repo| repo.commit_with_msg(msg));
+        self.on_all_repos_spinner("commit", |repo| repo.commit_with_msg(msg));
     }
     /// Tries to pull, add all, commit with msg "quick commit", and push all
     /// repositories, skips if fail.
