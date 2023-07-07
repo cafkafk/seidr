@@ -2,11 +2,39 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.2.0] - 2023-07-07
+
+### Bug Fixes
+
+- Made categories with only links possible
+
+### Features
+
+- [**breaking**] Put links in categories
+
+### Miscellaneous Tasks
+
+- Filled out Cargo.toml
+- Added test.yaml to gitignore
+- Fixed up code, roadmap for bump
+
+### Refactor
+
+- Simple code quality changes
+
+### Testing
+
+- Refactored testing, added tests dir
+
 ## [0.1.2] - 2023-07-03
 
 ### Features
 
 - Implemented quiet flag
+
+### Miscellaneous Tasks
+
+- Bump to v0.1.2
 
 ## [0.1.1] - 2023-07-03
 
@@ -24,6 +52,7 @@ All notable changes to this project will be documented in this file.
 
 ### Miscellaneous Tasks
 
+- Bump v0.1.0, housekeeping, #8 from cafkafk/dev
 - Bump to v0.1.1
 
 ## [0.1.0] - 2023-07-03
@@ -42,6 +71,7 @@ All notable changes to this project will be documented in this file.
 
 ### Miscellaneous Tasks
 
+- Bump to 0.0.7 #7 from cafkafk/dev
 - Bump v0.1.0, housekeeping
 
 ### Refactor
@@ -95,6 +125,7 @@ All notable changes to this project will be documented in this file.
 - Version bump to v0.0.3
 - Moved install scripts to ./bin
 - Merge 0.0.6
+- Merge 0.0.6 #6 from cafkafk/dev
 - Bump to 0.0.7
 
 ### Refactor
