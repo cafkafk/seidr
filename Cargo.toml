@@ -52,3 +52,11 @@ strip = true
 lto = "fat"
 opt-level = 3
 codegen-units = 1
+
+[dev-dependencies]
+criterion = { version = "0.5.1", features = ["html_reports"] }
+
+
+[[bench]]
+name = "basic_bench" # I'm just a basic bench, nothing fancy :p
+harness = false
