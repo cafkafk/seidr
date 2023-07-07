@@ -108,9 +108,9 @@ pub struct GitRepo {
 /// Represents a single operation on a repository
 pub struct SeriesItem<'series> {
     /// The string to be displayed to the user
-    operation: &'series str,
+    pub operation: &'series str,
     /// The closure representing the actual operation
-    closure: Box<dyn Fn(&GitRepo) -> (bool)>,
+    pub closure: Box<dyn Fn(&GitRepo) -> (bool)>,
 }
 
 ////////////////////////////////////
@@ -171,7 +171,7 @@ impl Link {
 
 impl GitRepo {
     /// Clones the repository to its specified folder.
-    fn clone(&self) -> bool {
+    pub fn clone(&self) -> bool {
         if self
             .flags
             .as_ref()
@@ -193,7 +193,7 @@ impl GitRepo {
         }
     }
     /// Pulls the repository if able.
-    fn pull(&self) -> bool {
+    pub fn pull(&self) -> bool {
         if self
             .flags
             .as_ref()
@@ -213,7 +213,7 @@ impl GitRepo {
         }
     }
     /// Adds all files in the repository.
-    fn add_all(&self) -> bool {
+    pub fn add_all(&self) -> bool {
         if self
             .flags
             .as_ref()
@@ -241,7 +241,7 @@ impl GitRepo {
     /// use status() instead of output(), as that makes using the native editor
     /// easy
     #[allow(dead_code)]
-    fn commit(&self) -> bool {
+    pub fn commit(&self) -> bool {
         if self
             .flags
             .as_ref()
@@ -261,7 +261,7 @@ impl GitRepo {
         }
     }
     /// Tries to commit changes with a message argument.
-    fn commit_with_msg(&self, msg: &str) -> bool {
+    pub fn commit_with_msg(&self, msg: &str) -> bool {
         if self
             .flags
             .as_ref()
@@ -283,7 +283,7 @@ impl GitRepo {
         }
     }
     /// Attempts to push the repository.
-    fn push(&self) -> bool {
+    pub fn push(&self) -> bool {
         if self
             .flags
             .as_ref()
@@ -445,6 +445,9 @@ impl Config {
     /// Here is an example of how an associated method could use this function.
     ///
     /// ```
+    /// use gg::git::SeriesItem;
+    /// use gg::git::GitRepo;
+    ///
     /// let series: Vec<SeriesItem> = vec![
     ///     SeriesItem {
     ///         operation: "pull",
@@ -463,7 +466,7 @@ impl Config {
     ///         closure: Box::new(move |repo: &GitRepo| repo.push()),
     ///     },
     /// ];
-    /// self.series_on_all(series);
+    /// // e.g. use self.series_on_all(series);
     /// ```
     pub fn series_on_all(&self, closures: Vec<SeriesItem>) {
         for category in self.categories.values() {
@@ -496,6 +499,9 @@ impl Config {
     /// Here is an example of how an associated method could use this function.
     ///
     /// ```
+    /// use gg::git::GitRepo;
+    /// use gg::git::SeriesItem;
+    ///
     /// let series: Vec<SeriesItem> = vec![
     ///     SeriesItem {
     ///         operation: "pull",
@@ -514,7 +520,7 @@ impl Config {
     ///         closure: Box::new(move |repo: &GitRepo| repo.push()),
     ///     },
     /// ];
-    /// self.all_on_all(series);
+    /// // self.all_on_all(series);
     /// ```
     pub fn all_on_all(&self, closures: Vec<SeriesItem>) {
         for category in self.categories.values() {
