@@ -116,7 +116,7 @@ fn main() {
 mod config {
     use crate::*;
     use git::RepoFlags::{Clone, Push};
-    use git::{Category, GitRepo, Link};
+    use git::{Category, GitRepo};
     use relative_path::RelativePath;
     use std::collections::HashMap;
     use std::env::current_dir;

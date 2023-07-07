@@ -54,8 +54,6 @@ pub enum RepoFlags {
 /// Represents the config.toml file.
 ///
 /// For diagrams of the underlying architecture, consult ARCHITECHTURE.md
-///
-///
 #[derive(Eq, PartialEq, Debug, Serialize, Deserialize)]
 pub struct Config {
     /// map of all categories
