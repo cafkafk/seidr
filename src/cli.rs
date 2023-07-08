@@ -119,9 +119,9 @@ pub enum Commands {
 pub enum JumpCommands {
     /// Jump to repo
     #[command(visible_alias = "r")]
-    Repo { name: Option<String> },
+    Repo { category: String, name: String },
 
     /// Jump to link
     #[command(visible_alias = "l")]
-    Link { name: Option<String> },
+    Link { category: String, name: String },
 }

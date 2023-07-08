@@ -43,7 +43,7 @@ mod settings;
 #[allow(unused)]
 mod utils;
 
-use cli::{Args, Commands};
+use cli::{Args, Commands, JumpCommands};
 use git::Config;
 use utils::strings::{FAST_COMMIT, QUICK_COMMIT};
 
@@ -107,9 +107,16 @@ fn main() {
         Some(Commands::CommitMsg { msg }) => {
             config.commit_all_msg(msg.as_ref().expect("failed to get message from input"));
         }
-        Some(Commands::Jump(_)) => {
-            todo!();
-        }
+        Some(Commands::Jump(cmd)) => match cmd {
+            JumpCommands::Repo { category, name } => {
+                config.get_repo(category, name, |repo| {
+                    println!("{}{}", repo.path, repo.name);
+                });
+            }
+            JumpCommands::Link { category, name } => {
+                config.get_link(category, name, |link| println!("{}", link.tx));
+            }
+        },
         None => (),
     }
     trace!("{:?}", config);
