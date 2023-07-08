@@ -109,4 +109,19 @@ pub enum Commands {
     /// Perform a git commit in all repositories, with predefined message
     #[command(visible_alias = "m")]
     CommitMsg { msg: Option<String> },
+
+    /// Jump to a given object
+    #[command(subcommand, visible_alias = "j")]
+    Jump(JumpCommands),
+}
+
+#[derive(Subcommand, Debug)]
+pub enum JumpCommands {
+    /// Jump to repo
+    #[command(visible_alias = "r")]
+    Repo { name: Option<String> },
+
+    /// Jump to link
+    #[command(visible_alias = "l")]
+    Link { name: Option<String> },
 }

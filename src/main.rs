@@ -107,6 +107,9 @@ fn main() {
         Some(Commands::CommitMsg { msg }) => {
             config.commit_all_msg(msg.as_ref().expect("failed to get message from input"));
         }
+        Some(Commands::Jump(_)) => {
+            todo!();
+        }
         None => (),
     }
     trace!("{:?}", config);
