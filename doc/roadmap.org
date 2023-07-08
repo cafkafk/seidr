@@ -1,5 +1,7 @@
 #+title: Roadmap
 
+* 0.2.1
+- [ ] jumps
 * 0.2.0 (maybe)
 - [X] Links in categories?
 - [X] Fix category with no links
