@@ -426,19 +426,13 @@ impl Config {
     /// repos but stop executing further functions on any repo that fails,
     /// without blocking the repos that don't have an issue.
     ///
-    /// This is actually somewhat hairy to do, at least at 6:16 am :S
-    ///
-    /// However, at 6:24, we're so ready! Let's go!
-    ///
-    /// Fun fact: only the last element of a tuple must have a dynamically typed size
-    ///
     /// # Usage
     ///
     /// Here is an example of how an associated method could use this function.
     ///
     /// ```
-    /// use gg::git::SeriesItem;
-    /// use gg::git::GitRepo;
+    /// # use gg::git::SeriesItem;
+    /// # use gg::git::GitRepo;
     ///
     /// let series: Vec<SeriesItem> = vec![
     ///     SeriesItem {
@@ -458,7 +452,6 @@ impl Config {
     ///         closure: Box::new(move |repo: &GitRepo| repo.push()),
     ///     },
     /// ];
-    /// // e.g. use self.series_on_all(series);
     /// ```
     pub fn series_on_all(&self, closures: Vec<SeriesItem>) {
         for category in self.categories.values() {
@@ -491,8 +484,8 @@ impl Config {
     /// Here is an example of how an associated method could use this function.
     ///
     /// ```
-    /// use gg::git::GitRepo;
-    /// use gg::git::SeriesItem;
+    /// # use gg::git::GitRepo;
+    /// # use gg::git::SeriesItem;
     ///
     /// let series: Vec<SeriesItem> = vec![
     ///     SeriesItem {
@@ -512,7 +505,6 @@ impl Config {
     ///         closure: Box::new(move |repo: &GitRepo| repo.push()),
     ///     },
     /// ];
-    /// // self.all_on_all(series);
     /// ```
     pub fn all_on_all(&self, closures: Vec<SeriesItem>) {
         for category in self.categories.values() {
