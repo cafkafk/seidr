@@ -74,15 +74,37 @@ fn main() {
         Some(Commands::Link { msg: _ }) => {
             config.link_all();
         }
-        Some(Commands::Quick { msg }) => {
-            let s = Box::leak(
-                msg.as_mut()
-                    .get_or_insert(&mut QUICK_COMMIT.to_string())
-                    .clone()
-                    .into_boxed_str(),
-            );
-            config.quick(s);
-        }
+        // NOTE: This implements "sub-subcommand"-like matching on repository,
+        // name, and additional data for a subcommand
+        // TODO: generalize for reuse by all commands that operate on repo->name->msg
+        Some(Commands::Quick { repo, name, msg }) => match (&repo, &name, &msg) {
+            (None, None, None) => {
+                let s = Box::leak(
+                    msg.as_mut()
+                        .get_or_insert(&mut QUICK_COMMIT.to_string())
+                        .clone()
+                        .into_boxed_str(),
+                );
+                config.quick(s);
+            }
+            (repo, None, None) => {
+                println!("{}", repo.as_ref().unwrap());
+                todo!();
+            }
+            (repo, name, None) => {
+                println!("{} {}", repo.as_ref().unwrap(), name.as_ref().unwrap());
+                todo!();
+            }
+            (repo, name, msg) => {
+                println!(
+                    "{} {} {}",
+                    repo.as_ref().unwrap(),
+                    name.as_ref().unwrap(),
+                    msg.as_ref().unwrap(),
+                );
+                todo!();
+            }
+        },
         Some(Commands::Fast { msg }) => {
             let s = Box::leak(
                 msg.as_mut()
