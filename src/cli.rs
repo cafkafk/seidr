@@ -84,7 +84,11 @@ pub enum Commands {
 
     /// Do quick pull-commit-push with msg for commit
     #[command(visible_alias = "q")]
-    Quick { msg: Option<String> },
+    Quick {
+        repo: Option<String>,
+        name: Option<String>,
+        msg: Option<String>,
+    },
 
     /// Do fast pull-commit-push with msg for commit, skipping repo on failure
     #[command(visible_alias = "f")]
