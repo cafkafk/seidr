@@ -101,10 +101,6 @@ pub struct GitRepo {
     pub flags: Option<Vec<RepoFlags>>,
 }
 
-////////////////////////////////////
-////////////////////////////////////
-////////////////////////////////////
-
 /// Represents a single operation on a repository
 pub struct SeriesItem<'series> {
     /// The string to be displayed to the user
@@ -112,10 +108,6 @@ pub struct SeriesItem<'series> {
     /// The closure representing the actual operation
     pub closure: Box<dyn Fn(&GitRepo) -> (bool)>,
 }
-
-////////////////////////////////////
-////////////////////////////////////
-////////////////////////////////////
 
 fn handle_file_exists(selff: &Link, tx_path: &Path, rx_path: &Path) -> bool {
     match rx_path.read_link() {
@@ -571,9 +563,6 @@ impl Config {
             .get(link_name)
             .expect("failed to get category"))
     }
-    //////////////////////////////////////////////////////////////
-    //////////////////////////////////////////////////////////////
-    //////////////////////////////////////////////////////////////
     /// Tries to pull all repositories, skips if fail.
     pub fn pull_all(&self) {
         debug!("exectuting pull_all");
@@ -647,9 +636,6 @@ impl Config {
         ];
         self.series_on_all(series);
     }
-    //////////////////////////////////////////////////////////////
-    //////////////////////////////////////////////////////////////
-    //////////////////////////////////////////////////////////////
     /// Tries to link all repositories, skips if fail.
     pub fn link_all(&self) {
         debug!("exectuting link_all");
