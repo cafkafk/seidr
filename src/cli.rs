@@ -72,6 +72,9 @@ pub struct Args {
     #[arg(short, long)]
     pub no_emoji: bool,
 
+    #[arg(short, long)]
+    pub message: Option<String>,
+
     #[command(subcommand)]
     pub command: Option<Commands>,
 }
@@ -80,39 +83,38 @@ pub struct Args {
 pub enum Commands {
     /// Link all... links
     #[command(visible_alias = "l")]
-    Link { msg: Option<String> },
+    Link {},
 
     /// Do quick pull-commit-push with msg for commit
     #[command(visible_alias = "q")]
     Quick {
         category: Option<String>,
         repo: Option<String>,
-        msg: Option<String>,
     },
 
     /// Do fast pull-commit-push with msg for commit, skipping repo on failure
     #[command(visible_alias = "f")]
-    Fast { msg: Option<String> },
+    Fast {},
 
     /// Clone all repositories
     #[command(visible_alias = "c")]
-    Clone { msg: Option<String> },
+    Clone {},
 
     /// Pull all repositories
     #[command(visible_alias = "p")]
-    Pull { msg: Option<String> },
+    Pull {},
 
     /// Add all files in repositories
     #[command(visible_alias = "a")]
-    Add { msg: Option<String> },
+    Add {},
 
     /// Perform a git commit in all repositories
     #[command(visible_alias = "ct")]
-    Commit { msg: Option<String> },
+    Commit {},
 
     /// Perform a git commit in all repositories, with predefined message
     #[command(visible_alias = "m")]
-    CommitMsg { msg: Option<String> },
+    CommitMsg {},
 
     /// Jump to a given object
     #[command(subcommand, visible_alias = "j")]

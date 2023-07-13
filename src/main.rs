@@ -62,16 +62,25 @@ fn main() {
     pretty_env_logger::init();
     let mut args = Args::parse();
     let config = Config::new(&args.config);
+
+    // Input from -m flag is stored here, this is just used to construct the
+    // persistent box
+    let mut message_input: String = "".to_string();
+
     match &args {
         args if args.license => println!("{}", utils::strings::INTERACTIVE_LICENSE),
         args if args.warranty => println!("{}", utils::strings::INTERACTIVE_WARRANTY),
         args if args.code_of_conduct => println!("{}", utils::strings::INTERACTIVE_COC),
         args if args.quiet => settings::QUIET.store(true, Ordering::Relaxed),
         args if args.no_emoji => settings::EMOJIS.store(true, Ordering::Relaxed),
+        args if args.message.is_some() => message_input = args.message.clone().unwrap(),
         _ => (),
     }
+
+    let message = Box::leak(message_input.into_boxed_str());
+
     match &mut args.command {
-        Some(Commands::Link { msg: _ }) => {
+        Some(Commands::Link {}) => {
             config.link_all();
         }
         // NOTE: This implements "sub-subcommand"-like matching on repository,
@@ -91,64 +100,48 @@ fn main() {
         // - [ ] gg quick category
         // - [ ] gg quick category repository
         // - [ ] gg quick category repository "stuff"
-        Some(Commands::Quick {
-            category,
-            repo,
-            msg,
-        }) => match (&category, &repo, &msg) {
+        //
+        // Roadmap:
+        // - [-] basic command parsing
+        //   - [ ] lacks -m flag
+        // - [ ] ability to run command on repos in category
+        // - [ ] ability to run command on single repo
+        Some(Commands::Quick { category, repo }) => match (&category, &repo) {
             // - gg quick
-            (None, None, None) => {
-                let s = Box::leak(
-                    msg.as_mut()
-                        .get_or_insert(&mut QUICK_COMMIT.to_string())
-                        .clone()
-                        .into_boxed_str(),
-                );
-                config.quick(s);
+            (None, None) => {
+                config.quick(message);
             }
             // - [ ] gg quick category
-            (category, None, None) => {
+            (category, None) => {
                 println!("{}", category.as_ref().unwrap());
                 todo!();
             }
-            (category, repo, None) => {
+            (category, repo) => {
                 println!("{} {}", category.as_ref().unwrap(), repo.as_ref().unwrap());
                 todo!();
-            }
-            // - [ ] gg quick category categorysitory "stuff"
-            (category, repo, msg) => {
-                println!(
-                    "{} {} {}",
-                    category.as_ref().unwrap(),
-                    repo.as_ref().unwrap(),
-                    msg.as_ref().unwrap(),
-                );
-                todo!();
-            }
+            } // // - [ ] gg quick category categorysitory "stuff"
+              // (category, repo) => {
+              //     println!("{} {}", category.as_ref().unwrap(), repo.as_ref().unwrap(),);
+              //     todo!();
+              // }
         },
-        Some(Commands::Fast { msg }) => {
-            let s = Box::leak(
-                msg.as_mut()
-                    .get_or_insert(&mut FAST_COMMIT.to_string())
-                    .clone()
-                    .into_boxed_str(),
-            );
-            config.fast(s);
+        Some(Commands::Fast {}) => {
+            config.fast(message);
         }
-        Some(Commands::Clone { msg: _ }) => {
+        Some(Commands::Clone {}) => {
             config.clone_all();
         }
-        Some(Commands::Pull { msg: _ }) => {
+        Some(Commands::Pull {}) => {
             config.pull_all();
         }
-        Some(Commands::Add { msg: _ }) => {
+        Some(Commands::Add {}) => {
             config.add_all();
         }
-        Some(Commands::Commit { msg: _ }) => {
+        Some(Commands::Commit {}) => {
             config.commit_all();
         }
-        Some(Commands::CommitMsg { msg }) => {
-            config.commit_all_msg(msg.as_ref().expect("failed to get message from input"));
+        Some(Commands::CommitMsg {}) => {
+            config.commit_all_msg(message);
         }
         Some(Commands::Jump(cmd)) => match cmd {
             JumpCommands::Repo { category, name } => {
