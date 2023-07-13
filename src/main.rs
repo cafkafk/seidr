@@ -77,7 +77,26 @@ fn main() {
         // NOTE: This implements "sub-subcommand"-like matching on repository,
         // name, and additional data for a subcommand
         // TODO: generalize for reuse by all commands that operate on repo->name->msg
-        Some(Commands::Quick { repo, name, msg }) => match (&repo, &name, &msg) {
+        //
+        // What we want:
+        // - gg quick
+        // - gg quick category
+        // - gg quick category repository
+        // - gg quick -m "message"
+        // - gg quick category -m "message"
+        // - gg quick category repo -m "hi"
+        //
+        // What we are implementing:
+        // - [x] gg quick
+        // - [ ] gg quick category
+        // - [ ] gg quick category repository
+        // - [ ] gg quick category repository "stuff"
+        Some(Commands::Quick {
+            category,
+            repo,
+            msg,
+        }) => match (&category, &repo, &msg) {
+            // - gg quick
             (None, None, None) => {
                 let s = Box::leak(
                     msg.as_mut()
@@ -87,19 +106,21 @@ fn main() {
                 );
                 config.quick(s);
             }
-            (repo, None, None) => {
-                println!("{}", repo.as_ref().unwrap());
+            // - [ ] gg quick category
+            (category, None, None) => {
+                println!("{}", category.as_ref().unwrap());
                 todo!();
             }
-            (repo, name, None) => {
-                println!("{} {}", repo.as_ref().unwrap(), name.as_ref().unwrap());
+            (category, repo, None) => {
+                println!("{} {}", category.as_ref().unwrap(), repo.as_ref().unwrap());
                 todo!();
             }
-            (repo, name, msg) => {
+            // - [ ] gg quick category categorysitory "stuff"
+            (category, repo, msg) => {
                 println!(
                     "{} {} {}",
+                    category.as_ref().unwrap(),
                     repo.as_ref().unwrap(),
-                    name.as_ref().unwrap(),
                     msg.as_ref().unwrap(),
                 );
                 todo!();
