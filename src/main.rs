@@ -162,7 +162,7 @@ fn main() {
 mod config {
     use crate::*;
     use git::RepoFlags::{Clone, Push};
-    use git::{Category, GitRepo};
+    use git::{Category, Repo};
     use relative_path::RelativePath;
     use std::collections::HashMap;
     use std::env::current_dir;
@@ -197,7 +197,7 @@ mod config {
                 .expect("failed to get repo")
                 .insert(
                     format!("{}", i).to_string(),
-                    GitRepo {
+                    Repo {
                         name: "test repo".to_string(),
                         path: "/tmp".to_string(),
                         url: "https://github.com/cafkafk/gg".to_string(),
@@ -275,7 +275,7 @@ mod config {
 #[cfg(test)]
 mod repo_actions {
     use crate::*;
-    use git::GitRepo;
+    use git::Repo;
     use relative_path::RelativePath;
     use std::env::current_dir;
     use std::process::Command;
@@ -295,7 +295,7 @@ mod repo_actions {
             repos: vec![],
             links: vec![],
         };
-        let repo = GitRepo {
+        let repo = Repo {
             name: test_repo_name.to_owned(),
             path: test_repo_dir.to_owned(),
             url: test_repo_url.to_owned(),
