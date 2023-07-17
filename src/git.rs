@@ -85,7 +85,7 @@ pub struct Category {
     ///
     /// Key should conceptually be seen as the name of the category.
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub repos: Option<HashMap<String, GitRepo>>,
+    pub repos: Option<HashMap<String, Repo>>,
 
     /// map of all links in category
     ///
@@ -105,13 +105,13 @@ pub struct Link {
 
 /// Holds a single git repository and related fields.
 #[derive(Eq, PartialEq, Debug, Serialize, Deserialize)]
-pub struct GitRepo {
+pub struct Repo {
     pub name: String,
     pub path: String,
     pub url: String,
     #[serde(skip_serializing_if = "Option::is_none")]
+    pub kind: Option<RepoKinds>, // FIXME: not implemented
     pub flags: Option<Vec<RepoFlags>>,
-    pub kind: Option<RepoKinds>,
 }
 
 /// Represents a single operation on a repository
@@ -119,7 +119,7 @@ pub struct SeriesItem<'series> {
     /// The string to be displayed to the user
     pub operation: &'series str,
     /// The closure representing the actual operation
-    pub closure: Box<dyn Fn(&GitRepo) -> (bool)>,
+    pub closure: Box<dyn Fn(&Repo) -> (bool)>,
 }
 
 fn handle_file_exists(selff: &Link, tx_path: &Path, rx_path: &Path) -> bool {
@@ -174,7 +174,7 @@ impl Link {
     }
 }
 
-impl GitRepo {
+impl Repo {
     /// Clones the repository to its specified folder.
     pub fn clone(&self) -> bool {
         if self
@@ -361,7 +361,7 @@ impl Config {
     /// NOTE: currently unused
     fn on_all<F>(&self, f: F)
     where
-        F: Fn(&GitRepo),
+        F: Fn(&Repo),
     {
         for category in self.categories.values() {
             for (_, repo) in category.repos.as_ref().expect("failed to get repos").iter() {
@@ -372,7 +372,7 @@ impl Config {
     // /// Runs associated function on all repos in config
     // fn on_all_spinner<F>(&self, op: &str, f: F)
     // where
-    //     F: Fn(&GitRepo) -> bool,
+    //     F: Fn(&Repo) -> bool,
     // {
     //     for category in self.categories.values() {
     //         for (_, repo) in category.repos.as_ref().expect("failed to get repos").iter() {
@@ -392,7 +392,7 @@ impl Config {
     /// Runs associated function on all repos in config
     fn on_all_repos_spinner<F>(&self, op: &str, f: F)
     where
-        F: Fn(&GitRepo) -> bool,
+        F: Fn(&Repo) -> bool,
     {
         for category in self.categories.values() {
             match category.repos.as_ref() {
@@ -469,24 +469,24 @@ impl Config {
     ///
     /// ```
     /// # use gg::git::SeriesItem;
-    /// # use gg::git::GitRepo;
+    /// # use gg::git::Repo;
     ///
     /// let series: Vec<SeriesItem> = vec![
     ///     SeriesItem {
     ///         operation: "pull",
-    ///         closure: Box::new(move |repo: &GitRepo| repo.pull()),
+    ///         closure: Box::new(move |repo: &Repo| repo.pull()),
     ///     },
     ///     SeriesItem {
     ///         operation: "add",
-    ///         closure: Box::new(move |repo: &GitRepo| repo.add_all()),
+    ///         closure: Box::new(move |repo: &Repo| repo.add_all()),
     ///     },
     ///     SeriesItem {
     ///         operation: "commit",
-    ///         closure: Box::new(move |repo: &GitRepo| repo.commit()),
+    ///         closure: Box::new(move |repo: &Repo| repo.commit()),
     ///     },
     ///     SeriesItem {
     ///         operation: "push",
-    ///         closure: Box::new(move |repo: &GitRepo| repo.push()),
+    ///         closure: Box::new(move |repo: &Repo| repo.push()),
     ///     },
     /// ];
     /// ```
@@ -521,25 +521,25 @@ impl Config {
     /// Here is an example of how an associated method could use this function.
     ///
     /// ```
-    /// # use gg::git::GitRepo;
+    /// # use gg::git::Repo;
     /// # use gg::git::SeriesItem;
     ///
     /// let series: Vec<SeriesItem> = vec![
     ///     SeriesItem {
     ///         operation: "pull",
-    ///         closure: Box::new(move |repo: &GitRepo| repo.pull()),
+    ///         closure: Box::new(move |repo: &Repo| repo.pull()),
     ///     },
     ///     SeriesItem {
     ///         operation: "add",
-    ///         closure: Box::new(move |repo: &GitRepo| repo.add_all()),
+    ///         closure: Box::new(move |repo: &Repo| repo.add_all()),
     ///     },
     ///     SeriesItem {
     ///         operation: "commit",
-    ///         closure: Box::new(move |repo: &GitRepo| repo.commit()),
+    ///         closure: Box::new(move |repo: &Repo| repo.commit()),
     ///     },
     ///     SeriesItem {
     ///         operation: "push",
-    ///         closure: Box::new(move |repo: &GitRepo| repo.push()),
+    ///         closure: Box::new(move |repo: &Repo| repo.push()),
     ///     },
     /// ];
     /// ```
@@ -566,7 +566,7 @@ impl Config {
     }
     pub fn get_repo<F>(&self, cat_name: &str, repo_name: &str, f: F)
     where
-        F: FnOnce(&GitRepo),
+        F: FnOnce(&Repo),
     {
         f(&self
             .categories
@@ -595,22 +595,22 @@ impl Config {
     /// Tries to pull all repositories, skips if fail.
     pub fn pull_all(&self) {
         debug!("exectuting pull_all");
-        self.on_all_repos_spinner("pull", GitRepo::pull);
+        self.on_all_repos_spinner("pull", Repo::pull);
     }
     /// Tries to clone all repossitories, skips if fail.
     pub fn clone_all(&self) {
         debug!("exectuting clone_all");
-        self.on_all_repos_spinner("clone", GitRepo::clone);
+        self.on_all_repos_spinner("clone", Repo::clone);
     }
     /// Tries to add all work in all repossitories, skips if fail.
     pub fn add_all(&self) {
         debug!("exectuting clone_all");
-        self.on_all_repos_spinner("add", GitRepo::add_all);
+        self.on_all_repos_spinner("add", Repo::add_all);
     }
     /// Tries to commit all repossitories one at a time, skips if fail.
     pub fn commit_all(&self) {
         debug!("exectuting clone_all");
-        self.on_all_repos_spinner("commit", GitRepo::commit);
+        self.on_all_repos_spinner("commit", Repo::commit);
     }
     /// Tries to commit all repossitories with msg, skips if fail.
     pub fn commit_all_msg(&self, msg: &str) {
@@ -624,19 +624,19 @@ impl Config {
         let series: Vec<SeriesItem> = vec![
             SeriesItem {
                 operation: "pull",
-                closure: Box::new(GitRepo::pull),
+                closure: Box::new(Repo::pull),
             },
             SeriesItem {
                 operation: "add",
-                closure: Box::new(GitRepo::add_all),
+                closure: Box::new(Repo::add_all),
             },
             SeriesItem {
                 operation: "commit",
-                closure: Box::new(move |repo: &GitRepo| repo.commit_with_msg(msg)),
+                closure: Box::new(move |repo: &Repo| repo.commit_with_msg(msg)),
             },
             SeriesItem {
                 operation: "push",
-                closure: Box::new(GitRepo::push),
+                closure: Box::new(Repo::push),
             },
         ];
         //self.all_on_all(series);
@@ -649,19 +649,19 @@ impl Config {
         let series: Vec<SeriesItem> = vec![
             SeriesItem {
                 operation: "pull",
-                closure: Box::new(GitRepo::pull),
+                closure: Box::new(Repo::pull),
             },
             SeriesItem {
                 operation: "add",
-                closure: Box::new(GitRepo::add_all),
+                closure: Box::new(Repo::add_all),
             },
             SeriesItem {
                 operation: "commit",
-                closure: Box::new(move |repo: &GitRepo| repo.commit_with_msg(msg)),
+                closure: Box::new(move |repo: &Repo| repo.commit_with_msg(msg)),
             },
             SeriesItem {
                 operation: "push",
-                closure: Box::new(GitRepo::push),
+                closure: Box::new(Repo::push),
             },
         ];
         self.series_on_all(series);
