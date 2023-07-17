@@ -321,19 +321,38 @@ macro_rules! run_series {
     ($conf:ident, $closures:ident) => {
         for category in $conf.categories.values() {
             for (_, repo) in category.repos.as_ref().expect("failed to get repos").iter() {
-                for instruction in &$closures {
-                    let f = &instruction.closure;
-                    let op = instruction.operation;
-                    if !settings::QUIET.load(std::sync::atomic::Ordering::Relaxed) {
-                        let mut sp =
-                            Spinner::new(Spinners::Dots10, format!("{}: {}", repo.name, op));
-                        if f(repo) {
-                            sp.stop_and_persist(success_str(), format!("{}: {}", repo.name, op));
-                        } else {
-                            sp.stop_and_persist(failure_str(), format!("{}: {}", repo.name, op));
+                use RepoKinds::*;
+                match &repo.kind {
+                    Some(GitRepo) => {
+                        for instruction in &$closures {
+                            let f = &instruction.closure;
+                            let op = instruction.operation;
+                            if !settings::QUIET.load(std::sync::atomic::Ordering::Relaxed) {
+                                let mut sp = Spinner::new(
+                                    Spinners::Dots10,
+                                    format!("{}: {}", repo.name, op),
+                                );
+                                if f(repo) {
+                                    sp.stop_and_persist(
+                                        success_str(),
+                                        format!("{}: {}", repo.name, op),
+                                    );
+                                } else {
+                                    sp.stop_and_persist(
+                                        failure_str(),
+                                        format!("{}: {}", repo.name, op),
+                                    );
+                                }
+                            } else {
+                                f(repo);
+                            }
                         }
-                    } else {
-                        f(repo);
+                    }
+                    None => {
+                        println!("unknown kind {:?}", repo.kind)
+                    }
+                    Some(kind) => {
+                        println!("unknown kind {kind:?}")
                     }
                 }
             }
