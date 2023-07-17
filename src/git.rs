@@ -111,6 +111,7 @@ pub struct GitRepo {
     pub url: String,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub flags: Option<Vec<RepoFlags>>,
+    pub kind: Option<RepoKinds>,
 }
 
 /// Represents a single operation on a repository

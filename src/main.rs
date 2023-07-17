@@ -202,6 +202,7 @@ mod config {
                         path: "/tmp".to_string(),
                         url: "https://github.com/cafkafk/gg".to_string(),
                         flags: Some(vec![Clone, Push]),
+                        kind: None,
                     },
                 );
         }
