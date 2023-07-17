@@ -52,6 +52,17 @@ pub enum RepoFlags {
     Fast,
 }
 
+#[derive(PartialEq, Eq, Serialize, Deserialize, Debug)]
+#[non_exhaustive]
+pub enum RepoKinds {
+    GitRepo,
+    GitHubRepo,
+    GitLabRepo,
+    GiteaRepo,
+    UrlRepo,
+    Link,
+}
+
 /// Represents the config.toml file.
 ///
 /// For diagrams of the underlying architecture, consult ARCHITECHTURE.md
