@@ -6,11 +6,13 @@ categories:
         name: qmk_firmware
         path: /home/ces/org/src/git/
         url: git@github.com:cafkafk/qmk_firmware.git
+        kind: GitRepo
         flags: [Clone, Push]
       starship:
         name: starship
         path: /home/ces/org/src/git/
         url: https://github.com/starship/starship.git
+        kind: GitRepo
         flags: [Clone, Push]
   utils:
     repos:
@@ -18,11 +20,13 @@ categories:
         name: gg
         path: /home/ces/.dots/
         url: git@github.com:cafkafk/gg.git
+        kind: GitRepo
         flags: [Clone, Push]
       li:
         name: li
         path: /home/ces/org/src/git/
         url: git@github.com:cafkafk/li.git
+        kind: GitRepo
         flags: [Clone, Push]
   empty:
   stuff:
@@ -31,10 +35,12 @@ categories:
       gg:
         name: gg
         path: /home/ces/.dots/
+        kind: GitRepo
         url: git@github.com:cafkafk/gg.git
       li:
         name: li
         path: /home/ces/org/src/git/
+        kind: GitRepo
         url: git@github.com:cafkafk/li.git
     links:
       gg:
