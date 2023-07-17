@@ -30,6 +30,7 @@ use crate::utils::strings::{failure_str, success_str};
 
 /// An enum containing flags that change behaviour of repos and categories
 #[derive(PartialOrd, Ord, PartialEq, Eq, Serialize, Deserialize, Debug)]
+#[non_exhaustive]
 pub enum RepoFlags {
     /// If clone is set, the repository should respond to the clone subcommand
     Clone,
