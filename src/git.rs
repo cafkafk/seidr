@@ -304,6 +304,30 @@ impl GitRepo {
     }
 }
 
+macro_rules! run_series {
+    ($conf:ident, $closures:ident) => {
+        for category in $conf.categories.values() {
+            for (_, repo) in category.repos.as_ref().expect("failed to get repos").iter() {
+                for instruction in &$closures {
+                    let f = &instruction.closure;
+                    let op = instruction.operation;
+                    if !settings::QUIET.load(std::sync::atomic::Ordering::Relaxed) {
+                        let mut sp =
+                            Spinner::new(Spinners::Dots10, format!("{}: {}", repo.name, op));
+                        if f(repo) {
+                            sp.stop_and_persist(success_str(), format!("{}: {}", repo.name, op));
+                        } else {
+                            sp.stop_and_persist(failure_str(), format!("{}: {}", repo.name, op));
+                        }
+                    } else {
+                        f(repo);
+                    }
+                }
+            }
+        }
+    };
+}
+
 impl Config {
     /// Loads the configuration toml from a path in to the Config struct.
     pub fn new(path: &String) -> Self {
@@ -602,7 +626,8 @@ impl Config {
                 closure: Box::new(GitRepo::push),
             },
         ];
-        self.all_on_all(series);
+        //self.all_on_all(series);
+        run_series!(self, series);
     }
     /// Tries to pull, add all, commit with msg "quick commit", and push all
     /// repositories, skips if fail.
