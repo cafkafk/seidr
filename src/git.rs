@@ -317,46 +317,14 @@ impl Repo {
     }
 }
 
+// pub fn all_on_all(&self, closures: Vec<SeriesItem>, break_on_err: bool) {
+
 macro_rules! run_series {
     ($conf:ident, $closures:ident) => {
-        for category in $conf.categories.values() {
-            for (_, repo) in category.repos.as_ref().expect("failed to get repos").iter() {
-                use RepoKinds::*;
-                match &repo.kind {
-                    Some(GitRepo) => {
-                        for instruction in &$closures {
-                            let f = &instruction.closure;
-                            let op = instruction.operation;
-                            if !settings::QUIET.load(std::sync::atomic::Ordering::Relaxed) {
-                                let mut sp = Spinner::new(
-                                    Spinners::Dots10,
-                                    format!("{}: {}", repo.name, op),
-                                );
-                                if f(repo) {
-                                    sp.stop_and_persist(
-                                        success_str(),
-                                        format!("{}: {}", repo.name, op),
-                                    );
-                                } else {
-                                    sp.stop_and_persist(
-                                        failure_str(),
-                                        format!("{}: {}", repo.name, op),
-                                    );
-                                }
-                            } else {
-                                f(repo);
-                            }
-                        }
-                    }
-                    None => {
-                        println!("unknown kind {:?}", repo.kind)
-                    }
-                    Some(kind) => {
-                        println!("unknown kind {kind:?}")
-                    }
-                }
-            }
-        }
+        $conf.all_on_all($closures, false);
+    };
+    ($conf:ident, $closures:ident, $stop_on_err:tt) => {
+        $conf.all_on_all($closures, $stop_on_err);
     };
 }
 
@@ -522,7 +490,7 @@ impl Config {
                             sp.stop_and_persist(success_str(), format!("{}: {}", repo.name, op));
                         } else {
                             sp.stop_and_persist(failure_str(), format!("{}: {}", repo.name, op));
-                            break;
+                            break; // NOTE: the difference :D
                         }
                     } else {
                         f(repo);
@@ -562,22 +530,44 @@ impl Config {
     ///     },
     /// ];
     /// ```
-    pub fn all_on_all(&self, closures: Vec<SeriesItem>) {
+    pub fn all_on_all(&self, closures: Vec<SeriesItem>, break_on_err: bool) {
         for category in self.categories.values() {
             for (_, repo) in category.repos.as_ref().expect("failed to get repos").iter() {
-                for instruction in &closures {
-                    let f = &instruction.closure;
-                    let op = instruction.operation;
-                    if !settings::QUIET.load(std::sync::atomic::Ordering::Relaxed) {
-                        let mut sp =
-                            Spinner::new(Spinners::Dots10, format!("{}: {}", repo.name, op));
-                        if f(repo) {
-                            sp.stop_and_persist(success_str(), format!("{}: {}", repo.name, op));
-                        } else {
-                            sp.stop_and_persist(failure_str(), format!("{}: {}", repo.name, op));
+                use RepoKinds::*;
+                match &repo.kind {
+                    Some(GitRepo) => {
+                        for instruction in &closures {
+                            let f = &instruction.closure;
+                            let op = instruction.operation;
+                            if !settings::QUIET.load(std::sync::atomic::Ordering::Relaxed) {
+                                let mut sp = Spinner::new(
+                                    Spinners::Dots10,
+                                    format!("{}: {}", repo.name, op),
+                                );
+                                if f(repo) {
+                                    sp.stop_and_persist(
+                                        success_str(),
+                                        format!("{}: {}", repo.name, op),
+                                    );
+                                } else {
+                                    sp.stop_and_persist(
+                                        failure_str(),
+                                        format!("{}: {}", repo.name, op),
+                                    );
+                                    if break_on_err {
+                                        break;
+                                    }
+                                }
+                            } else {
+                                f(repo);
+                            }
                         }
-                    } else {
-                        f(repo);
+                    }
+                    None => {
+                        println!("unknown kind {:?}", repo.kind)
+                    }
+                    Some(kind) => {
+                        println!("unknown kind {kind:?}")
                     }
                 }
             }
