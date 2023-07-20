@@ -442,65 +442,6 @@ impl Config {
     }
     /// Runs associated function on all repos in config
     ///
-    /// TODO: need to be made over a generic repo type
-    ///
-    /// # Current Problem
-    ///
-    /// The goal of this function is that it should run some function on all
-    /// repos but stop executing further functions on any repo that fails,
-    /// without blocking the repos that don't have an issue.
-    ///
-    /// # Usage
-    ///
-    /// Here is an example of how an associated method could use this function.
-    ///
-    /// ```
-    /// # use gg::git::SeriesItem;
-    /// # use gg::git::Repo;
-    ///
-    /// let series: Vec<SeriesItem> = vec![
-    ///     SeriesItem {
-    ///         operation: "pull",
-    ///         closure: Box::new(move |repo: &Repo| repo.pull()),
-    ///     },
-    ///     SeriesItem {
-    ///         operation: "add",
-    ///         closure: Box::new(move |repo: &Repo| repo.add_all()),
-    ///     },
-    ///     SeriesItem {
-    ///         operation: "commit",
-    ///         closure: Box::new(move |repo: &Repo| repo.commit()),
-    ///     },
-    ///     SeriesItem {
-    ///         operation: "push",
-    ///         closure: Box::new(move |repo: &Repo| repo.push()),
-    ///     },
-    /// ];
-    /// ```
-    pub fn series_on_all(&self, closures: Vec<SeriesItem>) {
-        for category in self.categories.values() {
-            for (_, repo) in category.repos.as_ref().expect("failed to get repos").iter() {
-                for instruction in &closures {
-                    let f = &instruction.closure;
-                    let op = instruction.operation;
-                    if !settings::QUIET.load(std::sync::atomic::Ordering::Relaxed) {
-                        let mut sp =
-                            Spinner::new(Spinners::Dots10, format!("{}: {}", repo.name, op));
-                        if f(repo) {
-                            sp.stop_and_persist(success_str(), format!("{}: {}", repo.name, op));
-                        } else {
-                            sp.stop_and_persist(failure_str(), format!("{}: {}", repo.name, op));
-                            break; // NOTE: the difference :D
-                        }
-                    } else {
-                        f(repo);
-                    }
-                }
-            }
-        }
-    }
-    /// Runs associated function on all repos in config
-    ///
     /// Unlike `series_on_all`, this does not stop if it encounters an error
     ///
     /// # Usage
@@ -673,7 +614,7 @@ impl Config {
                 closure: Box::new(Repo::push),
             },
         ];
-        self.series_on_all(series);
+        run_series!(self, series, true);
     }
     /// Tries to link all repositories, skips if fail.
     pub fn link_all(&self) {
