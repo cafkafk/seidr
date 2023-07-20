@@ -355,8 +355,54 @@ impl Repo {
     }
 }
 
-// pub fn all_on_all(&self, closures: Vec<SeriesItem>, break_on_err: bool) {
-
+/// run_series runs a closure series on a Config struct
+///
+/// # Examples
+///
+///
+/// ```
+/// use gg::git;
+/// use gg::git::Repo;
+/// use gg::git::Config;
+/// use std::env::current_dir;
+/// use gg::git::SeriesItem;
+/// use relative_path::RelativePath;
+///
+/// let root = current_dir().expect("failed to get current dir");
+/// let config = Config::new(
+///     &RelativePath::new("./src/test/config.yaml")
+///         .to_logical_path(root)
+///         .into_os_string()
+///         .into_string()
+///         .expect("failed to turnn config into string"),
+/// );
+///
+/// let series: Vec<SeriesItem> = vec![
+///     SeriesItem {
+///         operation: "pull",
+///         closure: Box::new(move |repo: &Repo| repo.pull()),
+///     },
+///     SeriesItem {
+///         operation: "add",
+///         closure: Box::new(move |repo: &Repo| repo.add_all()),
+///     },
+///     SeriesItem {
+///         operation: "commit",
+///         closure: Box::new(move |repo: &Repo| repo.commit()),
+///     },
+///     SeriesItem {
+///         operation: "push",
+///         closure: Box::new(move |repo: &Repo| repo.push()),
+///     },
+/// ];
+///
+/// // If we don't care if the series steps fail
+/// run_series!(config, series);
+///
+/// // If we want to skip repo as soon as a step fails
+/// run_series!(config, series, true);
+/// ```
+#[macro_export]
 macro_rules! run_series {
     ($conf:ident, $closures:ident) => {
         $conf.all_on_all($closures, false);
@@ -627,7 +673,6 @@ impl Config {
                 closure: Box::new(Repo::push),
             },
         ];
-        //self.all_on_all(series);
         run_series!(self, series);
     }
     /// Tries to pull, add all, commit with msg "quick commit", and push all
