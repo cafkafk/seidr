@@ -315,6 +315,44 @@ impl Repo {
         unimplemented!("This seems to easy to missuse/exploit");
         // fs::remove_dir_all(format!("{}{}", &self.path, &self.name))
     }
+    fn check_is_valid_GitRepo(&self) -> bool {
+        todo!();
+    }
+    fn check_is_valid_GitHubRepo(&self) -> bool {
+        todo!();
+    }
+    fn check_is_valid_GitLabRepo(&self) -> bool {
+        todo!();
+    }
+    fn check_is_valid_GiteaRepo(&self) -> bool {
+        todo!();
+    }
+    fn check_is_valid_UrlRepo(&self) -> bool {
+        todo!();
+    }
+    fn check_is_valid_Link(&self) -> bool {
+        todo!();
+    }
+    /// Check if Repo is a valid instance of its kind
+    pub fn is_valid_kind(&self) -> bool {
+        use RepoKinds::*;
+        match &self.kind {
+            Some(GitRepo) => self.check_is_valid_GitRepo(),
+            Some(GitHubRepo) => self.check_is_valid_GitHubRepo(),
+            Some(GitLabRepo) => self.check_is_valid_GitLabRepo(),
+            Some(GiteaRepo) => self.check_is_valid_GiteaRepo(),
+            Some(UrlRepo) => self.check_is_valid_UrlRepo(),
+            Some(Link) => self.check_is_valid_Link(),
+            Some(kind) => {
+                panic!("kind {kind:?} not implemented");
+                false
+            }
+            None => {
+                println!("unknown kind {:?}", self.kind);
+                false
+            }
+        }
+    }
 }
 
 // pub fn all_on_all(&self, closures: Vec<SeriesItem>, break_on_err: bool) {
