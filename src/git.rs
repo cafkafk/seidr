@@ -600,8 +600,13 @@ impl Config {
     /// ];
     /// ```
     pub fn all_on_all(&self, closures: Vec<SeriesItem>, break_on_err: bool) {
+        // HACK: creates a empty repo, that is used if a category doesn't have
+        // any repos or don't define the repo field
+        let tmp: HashMap<String, Repo> = HashMap::new();
+
         for category in self.categories.values() {
-            for (_, repo) in category.repos.as_ref().expect("failed to get repos").iter() {
+            // HACK: if the repo doesn't exist here, we inject tmp
+            for (_, repo) in category.repos.as_ref().unwrap_or_else(|| &tmp).iter() {
                 use RepoKinds::*;
                 match &repo.kind {
                     Some(GitRepo) => {
