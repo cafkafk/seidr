@@ -355,10 +355,22 @@ impl Repo {
         // fs::remove_dir_all(format!("{}{}", &self.path.as_ref(), &self.name.as_ref()))
     }
     fn check_is_valid_gitrepo(&self) -> bool {
-        // pub name: string,
-        // pub path: string,
-        // pub url: string,
-        todo!();
+        if (self.name.is_none()) {
+            eprintln!("{:?} must have name: <string>", self.kind);
+            return false;
+        }
+        if (self.path.is_none()) {
+            eprintln!("{:?} must have path: <string>", self.kind);
+            return false;
+        }
+        if (self.url.is_none()) {
+            eprintln!("{:?} must have url: <string>", self.kind);
+            return false;
+        }
+        assert!(self.name.is_some());
+        assert!(self.path.is_some());
+        assert!(self.url.is_some());
+        true
     }
     fn check_is_valid_githubrepo(&self) -> bool {
         todo!();
