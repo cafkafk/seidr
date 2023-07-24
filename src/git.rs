@@ -106,9 +106,10 @@ pub struct Link {
 /// Holds a single git repository and related fields.
 #[derive(Eq, PartialEq, Debug, Serialize, Deserialize)]
 pub struct Repo {
-    pub name: String,
-    pub path: String,
-    pub url: String,
+    pub name: Option<String>,
+    pub path: Option<String>,
+    pub url: Option<String>,
+    // TODO: make default a standard GitRepo
     #[serde(skip_serializing_if = "Option::is_none")]
     pub kind: Option<RepoKinds>, // FIXME: not implemented
     pub flags: Option<Vec<RepoFlags>>,
@@ -183,17 +184,20 @@ impl Repo {
             .expect("failed to unwrap flags")
             .contains(&RepoFlags::Clone)
         {
-            // TODO: check if &self.name already exists in dir
+            // TODO: check if &self.name.as_ref() already exists in dir
             let output = Command::new("git")
-                .current_dir(&self.path)
+                .current_dir(&self.path.as_ref().unwrap())
                 .arg("clone")
-                .arg(&self.url)
-                .arg(&self.name)
+                .arg(&self.url.as_ref().unwrap())
+                .arg(&self.name.as_ref().unwrap())
                 .output()
                 .unwrap_or_else(|_| panic!("git repo failed to clone: {:?}", &self,));
             output.status.success()
         } else {
-            info!("{} has clone set to false, not cloned", &self.name);
+            info!(
+                "{} has clone set to false, not cloned",
+                &self.name.as_ref().unwrap()
+            );
             false
         }
     }
@@ -207,13 +211,20 @@ impl Repo {
             .any(|s| s == &RepoFlags::Pull || s == &RepoFlags::Fast)
         {
             let output = Command::new("git")
-                .current_dir(format!("{}{}", &self.path, &self.name))
+                .current_dir(format!(
+                    "{}{}",
+                    &self.path.as_ref().unwrap(),
+                    &self.name.as_ref().unwrap()
+                ))
                 .arg("pull")
                 .output()
                 .unwrap_or_else(|_| panic!("git repo failed to pull: {:?}", &self,));
             output.status.success()
         } else {
-            info!("{} has clone set to false, not pulled", &self.name);
+            info!(
+                "{} has clone set to false, not pulled",
+                &self.name.as_ref().unwrap()
+            );
             false
         }
     }
@@ -227,14 +238,21 @@ impl Repo {
             .any(|s| s == &RepoFlags::Add || s == &RepoFlags::Quick || s == &RepoFlags::Fast)
         {
             let output = Command::new("git")
-                .current_dir(format!("{}{}", &self.path, &self.name))
+                .current_dir(format!(
+                    "{}{}",
+                    &self.path.as_ref().unwrap(),
+                    &self.name.as_ref().unwrap()
+                ))
                 .arg("add")
                 .arg(".")
                 .output()
                 .unwrap_or_else(|_| panic!("git repo failed to add: {:?}", &self,));
             output.status.success()
         } else {
-            info!("{} has clone set to false, not cloned", &self.name);
+            info!(
+                "{} has clone set to false, not cloned",
+                &self.name.as_ref().unwrap()
+            );
             false
         }
     }
@@ -255,13 +273,20 @@ impl Repo {
             .any(|s| s == &RepoFlags::Commit || s == &RepoFlags::Quick || s == &RepoFlags::Fast)
         {
             let status = Command::new("git")
-                .current_dir(format!("{}{}", &self.path, &self.name))
+                .current_dir(format!(
+                    "{}{}",
+                    &self.path.as_ref().unwrap(),
+                    &self.name.as_ref().unwrap()
+                ))
                 .arg("commit")
                 .status()
                 .unwrap_or_else(|_| panic!("git repo failed to commit: {:?}", &self,));
             status.success()
         } else {
-            info!("{} has push set to false, not cloned", &self.name);
+            info!(
+                "{} has push set to false, not cloned",
+                &self.name.as_ref().unwrap()
+            );
             false
         }
     }
@@ -275,7 +300,11 @@ impl Repo {
             .any(|s| s == &RepoFlags::Commit || s == &RepoFlags::Quick || s == &RepoFlags::Fast)
         {
             let output = Command::new("git")
-                .current_dir(format!("{}{}", &self.path, &self.name))
+                .current_dir(format!(
+                    "{}{}",
+                    &self.path.as_ref().unwrap(),
+                    &self.name.as_ref().unwrap()
+                ))
                 .arg("commit")
                 .arg("-m")
                 .arg(msg)
@@ -283,7 +312,10 @@ impl Repo {
                 .unwrap_or_else(|_| panic!("git repo failed to commit: {:?}", &self,));
             output.status.success()
         } else {
-            info!("{} has clone set to false, not cloned", &self.name);
+            info!(
+                "{} has clone set to false, not cloned",
+                &self.name.as_ref().unwrap()
+            );
             false
         }
     }
@@ -297,13 +329,20 @@ impl Repo {
             .any(|s| s == &RepoFlags::Push || s == &RepoFlags::Quick || s == &RepoFlags::Fast)
         {
             let output = Command::new("git")
-                .current_dir(format!("{}{}", &self.path, &self.name))
+                .current_dir(format!(
+                    "{}{}",
+                    &self.path.as_ref().unwrap(),
+                    &self.name.as_ref().unwrap()
+                ))
                 .arg("push")
                 .output()
                 .unwrap_or_else(|_| panic!("git repo failed to push: {:?}", &self,));
             output.status.success()
         } else {
-            info!("{} has clone set to false, not cloned", &self.name);
+            info!(
+                "{} has clone set to false, not cloned",
+                &self.name.as_ref().unwrap()
+            );
             false
         }
     }
@@ -313,9 +352,12 @@ impl Repo {
     fn remove() -> Result<(), std::io::Error> {
         // https://doc.rust-lang.org/std/fs/fn.remove_dir_all.html
         unimplemented!("This seems to easy to missuse/exploit");
-        // fs::remove_dir_all(format!("{}{}", &self.path, &self.name))
+        // fs::remove_dir_all(format!("{}{}", &self.path.as_ref(), &self.name.as_ref()))
     }
     fn check_is_valid_GitRepo(&self) -> bool {
+        // pub name: String,
+        // pub path: String,
+        // pub url: String,
         todo!();
     }
     fn check_is_valid_GitHubRepo(&self) -> bool {
@@ -448,11 +490,11 @@ impl Config {
     //     for category in self.categories.values() {
     //         for (_, repo) in category.repos.as_ref().expect("failed to get repos").iter() {
     //             if !settings::QUIET.load(std::sync::atomic::Ordering::Relaxed) {
-    //                 let mut sp = Spinner::new(Spinners::Dots10, format!("{}: {}", repo.name, op));
+    //                 let mut sp = Spinner::new(Spinners::Dots10, format!("{}: {}", repo.name.as_ref(), op));
     //                 if f(repo) {
-    //                     sp.stop_and_persist(success_str(), format!("{}: {}", repo.name, op));
+    //                     sp.stop_and_persist(success_str(), format!("{}: {}", repo.name.as_ref(), op));
     //                 } else {
-    //                     sp.stop_and_persist(failure_str(), format!("{}: {}", repo.name, op));
+    //                     sp.stop_and_persist(failure_str(), format!("{}: {}", repo.name.as_ref(), op));
     //                 }
     //             } else {
     //                 f(repo);
@@ -470,17 +512,19 @@ impl Config {
                 Some(repos) => {
                     for repo in repos.values() {
                         if !settings::QUIET.load(std::sync::atomic::Ordering::Relaxed) {
-                            let mut sp =
-                                Spinner::new(Spinners::Dots10, format!("{}: {}", repo.name, op));
+                            let mut sp = Spinner::new(
+                                Spinners::Dots10,
+                                format!("{}: {}", repo.name.as_ref().unwrap(), op),
+                            );
                             if f(repo) {
                                 sp.stop_and_persist(
                                     success_str(),
-                                    format!("{}: {}", repo.name, op),
+                                    format!("{}: {}", repo.name.as_ref().unwrap(), op),
                                 );
                             } else {
                                 sp.stop_and_persist(
                                     failure_str(),
-                                    format!("{}: {}", repo.name, op),
+                                    format!("{}: {}", repo.name.as_ref().unwrap(), op),
                                 );
                             }
                         } else {
@@ -567,17 +611,17 @@ impl Config {
                             if !settings::QUIET.load(std::sync::atomic::Ordering::Relaxed) {
                                 let mut sp = Spinner::new(
                                     Spinners::Dots10,
-                                    format!("{}: {}", repo.name, op),
+                                    format!("{}: {}", repo.name.as_ref().unwrap(), op),
                                 );
                                 if f(repo) {
                                     sp.stop_and_persist(
                                         success_str(),
-                                        format!("{}: {}", repo.name, op),
+                                        format!("{}: {}", repo.name.as_ref().unwrap(), op),
                                     );
                                 } else {
                                     sp.stop_and_persist(
                                         failure_str(),
-                                        format!("{}: {}", repo.name, op),
+                                        format!("{}: {}", repo.name.as_ref().unwrap(), op),
                                     );
                                     if break_on_err {
                                         break;
