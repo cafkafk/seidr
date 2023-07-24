@@ -276,6 +276,64 @@ mod config {
             });
         }
     }
+    #[test]
+    fn test_validators_config() {
+        use crate::git::SeriesItem;
+        let root = current_dir().expect("failed to get current dir");
+        let config = Config::new(
+            &RelativePath::new("./src/test/config.yaml")
+                .to_logical_path(&root)
+                .into_os_string()
+                .into_string()
+                .expect("failed to turn config into string"),
+        );
+        let series: Vec<SeriesItem> = vec![SeriesItem {
+            operation: "is_valid_kind",
+            closure: Box::new(Repo::is_valid_kind),
+        }];
+        run_series!(config, series, true);
+    }
+    #[test]
+    #[should_panic]
+    fn test_validators_fail() {
+        use crate::git::SeriesItem;
+        let default_category = Category {
+            flags: Some(vec![]),
+            repos: Some(HashMap::new()),
+            links: Some(HashMap::new()),
+        };
+        let mut config = Config {
+            categories: HashMap::new(),
+        };
+        config
+            .categories
+            .insert(format!("{}", 0).to_string(), default_category);
+        for i in 0..=5 {
+            config
+                .categories
+                .get_mut(&format!("{}", 0).to_string())
+                .expect("category not found")
+                .repos
+                .as_mut()
+                .expect("failed to get repo")
+                .insert(
+                    format!("{}", i).to_string(),
+                    // WE create a broken repo
+                    Repo {
+                        name: None,
+                        path: Some("/tmp".to_string()),
+                        url: Some("https://github.com/cafkafk/gg".to_string()),
+                        flags: Some(vec![Clone, Push]),
+                        kind: Some(crate::git::RepoKinds::GitRepo),
+                    },
+                );
+        }
+        let series: Vec<SeriesItem> = vec![SeriesItem {
+            operation: "is_valid_kind",
+            closure: Box::new(Repo::is_valid_kind),
+        }];
+        run_series!(config, series, true);
+    }
 }
 
 /* FIXME Unable to test with networking inside flake
