@@ -354,37 +354,37 @@ impl Repo {
         unimplemented!("This seems to easy to missuse/exploit");
         // fs::remove_dir_all(format!("{}{}", &self.path.as_ref(), &self.name.as_ref()))
     }
-    fn check_is_valid_GitRepo(&self) -> bool {
-        // pub name: String,
-        // pub path: String,
-        // pub url: String,
+    fn check_is_valid_gitrepo(&self) -> bool {
+        // pub name: string,
+        // pub path: string,
+        // pub url: string,
         todo!();
     }
-    fn check_is_valid_GitHubRepo(&self) -> bool {
+    fn check_is_valid_githubrepo(&self) -> bool {
         todo!();
     }
-    fn check_is_valid_GitLabRepo(&self) -> bool {
+    fn check_is_valid_gitlabrepo(&self) -> bool {
         todo!();
     }
-    fn check_is_valid_GiteaRepo(&self) -> bool {
+    fn check_is_valid_gitearepo(&self) -> bool {
         todo!();
     }
-    fn check_is_valid_UrlRepo(&self) -> bool {
+    fn check_is_valid_urlrepo(&self) -> bool {
         todo!();
     }
-    fn check_is_valid_Link(&self) -> bool {
+    fn check_is_valid_link(&self) -> bool {
         todo!();
     }
     /// Check if Repo is a valid instance of its kind
     pub fn is_valid_kind(&self) -> bool {
         use RepoKinds::*;
         match &self.kind {
-            Some(GitRepo) => self.check_is_valid_GitRepo(),
-            Some(GitHubRepo) => self.check_is_valid_GitHubRepo(),
-            Some(GitLabRepo) => self.check_is_valid_GitLabRepo(),
-            Some(GiteaRepo) => self.check_is_valid_GiteaRepo(),
-            Some(UrlRepo) => self.check_is_valid_UrlRepo(),
-            Some(Link) => self.check_is_valid_Link(),
+            Some(GitRepo) => self.check_is_valid_gitrepo(),
+            Some(GitHubRepo) => self.check_is_valid_githubrepo(),
+            Some(GitLabRepo) => self.check_is_valid_gitlabrepo(),
+            Some(GiteaRepo) => self.check_is_valid_gitearepo(),
+            Some(UrlRepo) => self.check_is_valid_urlrepo(),
+            Some(Link) => self.check_is_valid_link(),
             Some(kind) => {
                 panic!("kind {kind:?} not implemented");
                 false
