@@ -186,10 +186,10 @@ impl Repo {
         {
             // TODO: check if &self.name.as_ref() already exists in dir
             let output = Command::new("git")
-                .current_dir(&self.path.as_ref().unwrap())
+                .current_dir(self.path.as_ref().unwrap())
                 .arg("clone")
-                .arg(&self.url.as_ref().unwrap())
-                .arg(&self.name.as_ref().unwrap())
+                .arg(self.url.as_ref().unwrap())
+                .arg(self.name.as_ref().unwrap())
                 .output()
                 .unwrap_or_else(|_| panic!("git repo failed to clone: {:?}", &self,));
             output.status.success()
@@ -618,7 +618,7 @@ impl Config {
 
         for category in self.categories.values() {
             // HACK: if the repo doesn't exist here, we inject tmp
-            for (_, repo) in category.repos.as_ref().unwrap_or_else(|| &tmp).iter() {
+            for (_, repo) in category.repos.as_ref().unwrap_or(&tmp).iter() {
                 use RepoKinds::*;
                 match &repo.kind {
                     Some(GitRepo) => {
@@ -650,10 +650,10 @@ impl Config {
                         }
                     }
                     None => {
-                        println!("unknown kind {:?}", repo.kind)
+                        println!("unknown kind {:?}", repo.kind);
                     }
                     Some(kind) => {
-                        println!("unknown kind {kind:?}")
+                        println!("unknown kind {kind:?}");
                     }
                 }
             }
@@ -663,7 +663,7 @@ impl Config {
     where
         F: FnOnce(&Repo),
     {
-        f(&self
+        f(self
             .categories
             .get(cat_name)
             .expect("failed to get category")
@@ -671,13 +671,13 @@ impl Config {
             .as_ref()
             .expect("failed to get repo")
             .get(repo_name)
-            .expect("failed to get category"))
+            .expect("failed to get category"));
     }
     pub fn get_link<F>(&self, cat_name: &str, link_name: &str, f: F)
     where
         F: FnOnce(&Link),
     {
-        f(&self
+        f(self
             .categories
             .get(cat_name)
             .expect("failed to get category")
@@ -685,7 +685,7 @@ impl Config {
             .as_ref()
             .expect("failed to get repo")
             .get(link_name)
-            .expect("failed to get category"))
+            .expect("failed to get category"));
     }
     /// Tries to pull all repositories, skips if fail.
     pub fn pull_all(&self) {

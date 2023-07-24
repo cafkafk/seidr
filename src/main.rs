@@ -45,7 +45,6 @@ mod utils;
 
 use cli::{Args, Commands, JumpCommands};
 use git::Config;
-use utils::strings::{FAST_COMMIT, QUICK_COMMIT};
 
 use clap::Parser;
 
@@ -65,7 +64,7 @@ fn main() {
 
     // Input from -m flag is stored here, this is just used to construct the
     // persistent box
-    let mut message_input: String = "".to_string();
+    let mut message_input: String = String::new();
 
     match &args {
         args if args.license => println!("{}", utils::strings::INTERACTIVE_LICENSE),
