@@ -146,7 +146,11 @@ fn main() {
         Some(Commands::Jump(cmd)) => match cmd {
             JumpCommands::Repo { category, name } => {
                 config.get_repo(category, name, |repo| {
-                    println!("{}{}", repo.path, repo.name);
+                    println!(
+                        "{}{}",
+                        repo.path.as_ref().unwrap(),
+                        repo.name.as_ref().unwrap()
+                    );
                 });
             }
             JumpCommands::Link { category, name } => {
@@ -198,9 +202,9 @@ mod config {
                 .insert(
                     format!("{}", i).to_string(),
                     Repo {
-                        name: "test repo".to_string(),
-                        path: "/tmp".to_string(),
-                        url: "https://github.com/cafkafk/gg".to_string(),
+                        name: Some("test repo".to_string()),
+                        path: Some("/tmp".to_string()),
+                        url: Some("https://github.com/cafkafk/gg".to_string()),
                         flags: Some(vec![Clone, Push]),
                         kind: None,
                     },
@@ -258,9 +262,12 @@ mod config {
         #[allow(clippy::bool_assert_comparison)]
         {
             (&config).get_repo("config", "qmk_firmware", |repo| {
-                assert_eq!(repo.name, "qmk_firmware");
-                assert_eq!(repo.path, "/home/ces/org/src/git/");
-                assert_eq!(repo.url, "git@github.com:cafkafk/qmk_firmware.git");
+                assert_eq!(repo.name.as_ref().unwrap(), "qmk_firmware");
+                assert_eq!(repo.path.as_ref().unwrap(), "/home/ces/org/src/git/");
+                assert_eq!(
+                    repo.url.as_ref().unwrap(),
+                    "git@github.com:cafkafk/qmk_firmware.git"
+                );
             });
             (&config).get_link("stuff", "gg", |link| {
                 assert_eq!(link.name, "gg");
