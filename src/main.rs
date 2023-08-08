@@ -29,7 +29,7 @@
 //! aren't introduced.
 //!
 //! That said, we're in 0.0.Z, *here be dragons* for now.
-#![feature(unsized_tuple_coercion)]
+// #![feature(unsized_tuple_coercion)]
 
 extern crate log;
 extern crate pretty_env_logger;
