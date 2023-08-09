@@ -1,5 +1,5 @@
 use criterion::{black_box, criterion_group, criterion_main, Criterion};
-use gg::git::Config;
+use seidr::git::Config;
 use relative_path::RelativePath;
 
 pub fn criterion_benchmark(c: &mut Criterion) {

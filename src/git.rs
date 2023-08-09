@@ -415,11 +415,11 @@ impl Repo {
 ///
 ///
 /// ```
-/// use gg::git;
-/// use gg::git::Repo;
-/// use gg::git::Config;
+/// use seidr::git;
+/// use seidr::git::Repo;
+/// use seidr::git::Config;
 /// use std::env::current_dir;
-/// use gg::git::SeriesItem;
+/// use seidr::git::SeriesItem;
 /// use relative_path::RelativePath;
 ///
 /// let root = current_dir().expect("failed to get current dir");
@@ -589,8 +589,8 @@ impl Config {
     /// Here is an example of how an associated method could use this function.
     ///
     /// ```
-    /// # use gg::git::Repo;
-    /// # use gg::git::SeriesItem;
+    /// # use seidr::git::Repo;
+    /// # use seidr::git::SeriesItem;
     ///
     /// let series: Vec<SeriesItem> = vec![
     ///     SeriesItem {

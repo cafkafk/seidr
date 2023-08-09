@@ -16,10 +16,10 @@ categories:
         flags: [Clone, Push]
   utils:
     repos:
-      gg:
-        name: gg
+      seidr:
+        name: seidr
         path: /home/ces/.dots/
-        url: git@github.com:cafkafk/gg.git
+        url: git@github.com:cafkafk/seidr.git
         kind: GitRepo
         flags: [Clone, Push]
       li:
@@ -32,21 +32,21 @@ categories:
   stuff:
     flags: []
     repos:
-      gg:
-        name: gg
+      seidr:
+        name: seidr
         path: /home/ces/.dots/
         kind: GitRepo
-        url: git@github.com:cafkafk/gg.git
+        url: git@github.com:cafkafk/seidr.git
       li:
         name: li
         path: /home/ces/org/src/git/
         kind: GitRepo
         url: git@github.com:cafkafk/li.git
     links:
-      gg:
-        name: gg
-        rx: /home/ces/.config/gg
-        tx: /home/ces/.dots/gg
+      seidr:
+        name: seidr
+        rx: /home/ces/.config/seidr
+        tx: /home/ces/.dots/seidr
       starship:
         name: starship
         rx: /home/ces/.config/starship.toml
@@ -54,10 +54,10 @@ categories:
   fluff:
     flags: []
     links:
-      gg:
-        name: gg
-        rx: /home/ces/.config/gg
-        tx: /home/ces/.dots/gg
+      seidr:
+        name: seidr
+        rx: /home/ces/.config/seidr
+        tx: /home/ces/.dots/seidr
       starship:
         name: starship
         rx: /home/ces/.config/starship.toml

@@ -21,7 +21,7 @@ use crate::utils::strings::INTERACTIVE_NOTICE;
 
 use clap::{ArgAction, CommandFactory, Parser, Subcommand};
 
-const CONFIG_FILE: &str = "/.config/gg/config.yaml";
+const CONFIG_FILE: &str = "/.config/seidr/config.yaml";
 
 const HELP_TEMPLATE: &str = "\
 {before-help}{name} {version}
@@ -36,7 +36,7 @@ const HELP_TEMPLATE: &str = "\
 //#[clap(author, version, about, long_about = None)]
 #[derive(Parser, Debug)]
 #[clap(
-    name="gg - git gut",
+    name="seidr - git gut",
     author,
     version,
     long_version=env!("CARGO_PKG_VERSION"),

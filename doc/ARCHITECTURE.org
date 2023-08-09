@@ -6,7 +6,7 @@
 There were 3 major designs considered so far (here in chronological order).
 
 **** Vec Based
-Code sketch in https://github.com/cafkafk/gg/commit/3d3b6d6646bda84333018cd621cd8bd6348b9cef
+Code sketch in https://github.com/cafkafk/seidr/commit/3d3b6d6646bda84333018cd621cd8bd6348b9cef
 
 #+begin_src mermaid :file ./doc/img/config-struct-vec.png :width 4000px
 flowchart LR
