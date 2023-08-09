@@ -1,5 +1,5 @@
 #+options: toc:nil
-* gg - git gut
+* Seiðr
 #+html: <img src="https://img.shields.io/badge/license-GPLv3-blue"><img src="https://img.shields.io/badge/Contributor%20Covenant-2.1-4baaaa.svg">
 
 A Rust GitOps/symlinkfarm orchestrator inspired by GNU Stow. Useful for dealing
@@ -19,16 +19,16 @@ commit).
 
 ** Installation
 #+begin_src sh
-$ git clone https://github.com/cafkafk/gg
-$ cd gg
+$ git clone https://github.com/cafkafk/seidr
+$ cd seidr
 $ cargo install --path .
 #+end_src
 
 ** Configuration
 If you want a template, you can copy the file from src/test/config.yaml:
 #+begin_src sh
-$ mkdir -p ~/.config/gg/
-$ cp src/test/config.yaml ~/.config/gg/config.yaml
+$ mkdir -p ~/.config/seidr/
+$ cp src/test/config.yaml ~/.config/seidr/config.yaml
 #+end_src
 
 You should *seriously* change this file before running any commands.

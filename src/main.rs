@@ -87,18 +87,18 @@ fn main() {
         // TODO: generalize for reuse by all commands that operate on repo->name->msg
         //
         // What we want:
-        // - gg quick
-        // - gg quick category
-        // - gg quick category repository
-        // - gg quick -m "message"
-        // - gg quick category -m "message"
-        // - gg quick category repo -m "hi"
+        // - seidr quick
+        // - seidr quick category
+        // - seidr quick category repository
+        // - seidr quick -m "message"
+        // - seidr quick category -m "message"
+        // - seidr quick category repo -m "hi"
         //
         // What we are implementing:
-        // - [x] gg quick
-        // - [ ] gg quick category
-        // - [ ] gg quick category repository
-        // - [ ] gg quick category repository "stuff"
+        // - [x] seidr quick
+        // - [ ] seidr quick category
+        // - [ ] seidr quick category repository
+        // - [ ] seidr quick category repository "stuff"
         //
         // Roadmap:
         // - [-] basic command parsing
@@ -106,11 +106,11 @@ fn main() {
         // - [ ] ability to run command on repos in category
         // - [ ] ability to run command on single repo
         Some(Commands::Quick { category, repo }) => match (&category, &repo) {
-            // - gg quick
+            // - seidr quick
             (None, None) => {
                 config.quick(message);
             }
-            // - [ ] gg quick category
+            // - [ ] seidr quick category
             (category, None) => {
                 println!("{}", category.as_ref().unwrap());
                 todo!();
@@ -118,7 +118,7 @@ fn main() {
             (category, repo) => {
                 println!("{} {}", category.as_ref().unwrap(), repo.as_ref().unwrap());
                 todo!();
-            } // // - [ ] gg quick category categorysitory "stuff"
+            } // // - [ ] seidr quick category categorysitory "stuff"
               // (category, repo) => {
               //     println!("{} {}", category.as_ref().unwrap(), repo.as_ref().unwrap(),);
               //     todo!();
@@ -203,7 +203,7 @@ mod config {
                     Repo {
                         name: Some("test repo".to_string()),
                         path: Some("/tmp".to_string()),
-                        url: Some("https://github.com/cafkafk/gg".to_string()),
+                        url: Some("https://github.com/cafkafk/seidr".to_string()),
                         flags: Some(vec![Clone, Push]),
                         kind: None,
                     },
@@ -268,10 +268,10 @@ mod config {
                     "git@github.com:cafkafk/qmk_firmware.git"
                 );
             });
-            (&config).get_link("stuff", "gg", |link| {
-                assert_eq!(link.name, "gg");
-                assert_eq!(link.tx, "/home/ces/.dots/gg");
-                assert_eq!(link.rx, "/home/ces/.config/gg");
+            (&config).get_link("stuff", "seidr", |link| {
+                assert_eq!(link.name, "seidr");
+                assert_eq!(link.tx, "/home/ces/.dots/seidr");
+                assert_eq!(link.rx, "/home/ces/.config/seidr");
             });
         }
     }
@@ -321,7 +321,7 @@ mod config {
                     Repo {
                         name: None,
                         path: Some("/tmp".to_string()),
-                        url: Some("https://github.com/cafkafk/gg".to_string()),
+                        url: Some("https://github.com/cafkafk/seidr".to_string()),
                         flags: Some(vec![Clone, Push]),
                         kind: Some(crate::git::RepoKinds::GitRepo),
                     },

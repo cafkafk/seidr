@@ -1,14 +1,14 @@
 [package]
-name = "gg"
+name = "seidr"
 version = "0.2.0"
 authors = ["Christina Sørensen"]
 edition = "2021"
 rust-version = "1.70.0"
 description = "A Rust GitOps/symlinkfarm orchestrator inspired by GNU Stow."
-documentation = "https://github.com/cafkafk/gg"
+documentation = "https://github.com/cafkafk/seidr"
 readme = "./README.org"
-homepage = "https://github.com/cafkafk/gg"
-repository = "https://github.com/cafkafk/gg"
+homepage = "https://github.com/cafkafk/seidr"
+repository = "https://github.com/cafkafk/seidr"
 license = "GPL-3.0-only"
 keywords = ["git", "declarative", "cli", "devops", "terminal"]
 categories = ["command-line-interface", "command-line-utilities"]
@@ -16,8 +16,8 @@ categories = ["command-line-interface", "command-line-utilities"]
 # build = "build.rs"
 # links = "git2"
 # exclude = "./vacation_photos"
-# include = "./gg_memes"
-publish = false
+# include = "./seidr_memes"
+# publish = false
 # metadata
 # deafult-run
 # autobins
