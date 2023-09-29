@@ -17,6 +17,9 @@ Highly unstable project, expect each change to be breaking.
 
 [![asciicast](https://asciinema.org/a/TVmnEYR3PK40GtoZnwavun0dP.svg)](https://asciinema.org/a/TVmnEYR3PK40GtoZnwavun0dP)
 
+> **Warn**
+> This is experimental, and not in the Nix sense. I'm gonna change how links work soon.
+
 A Rust GitOps/symlinkfarm orchestrator inspired by GNU Stow. Useful for dealing
 with "dotfiles", and with git support as a first class feature. Configuration is
 done throug a single yaml file, giving it a paradigm that should bring joy to
@@ -45,3 +48,111 @@ If you want a template, you can copy the file from src/test/config.yaml:
 You should *seriously* change this file before running any commands.
 
 The configuration format will likely break regularly in versions 0.Y.Z.
+
+#### Dhall
+
+I already daily drive seidr, and here's an example of how I keep it manageable with dhall. Writing the `.yaml` files by hand and keeping them up to date quickly felt like writing aterm `.drv` files for Nix by hand... that is to say not pleasant. This somewhat makes it better.
+
+```dhall
+let {- First, we define some useful variables
+    -}
+    home
+    : Text
+    = "/home/ces/"
+
+let config
+    : Text
+    = "${home}/.config/"
+
+let gitProjectsDir
+    : Text
+    = "${home}/org/src/git/"
+
+let nixosConfigName
+    : Text
+    = "afk-nixos"
+
+let nixosConfigDir
+    : Text
+    = gitProjectsDir
+
+let nixosConfigPath
+    : Text
+    = "${home}/org/src/git/${nixosConfigName}/"
+
+let seidrConfigPath
+    : Text
+    = "${nixosConfigPath}/seidr/"
+
+let {- Now, we create some schemes and types and such to make our lives easier
+
+       TODO: We could totally also write some functions, but I haven't gotten to that yet.
+    -}
+    Flags
+    : Type
+    = < Clone | Fast >
+
+let Repo
+    : Type
+    = { name : Optional Text
+      , path : Optional Text
+      , url : Optional Text
+      , kind : Optional Text
+      , flags : Optional (List Flags)
+      }
+
+let Link
+    : Type
+    = { name : Optional Text, rx : Text, tx : Text }
+
+let {- Here, we define our repositories
+    -}
+    nixosConfigRepo
+    : Repo
+    = { name = Some nixosConfigName
+      , path = Some nixosConfigDir
+      , url = Some "git@github.com:cafkafk/afk-nixos.git"
+      , kind = Some "GitRepo"
+      , flags = Some [ Flags.Clone, Flags.Fast ]
+      }
+
+let ezaDevelopmentRepo
+    : Repo
+    = { name = Some "eza"
+      , path = Some gitProjectsDir
+      , url = Some "git@github.com:eza-community/eza.git"
+      , kind = Some "GitRepo"
+      , flags = Some [ Flags.Clone, Flags.Fast ]
+      }
+
+let {- Here, we define our repositories
+    -}
+    starship
+    : Link
+    = { name = Some "starship"
+      , tx = "${seidrConfigPath}/starship.toml"
+      , rx = "${config}/starship.toml"
+      }
+
+let {- And now we pull it all together -}
+    categories =
+      { seidr.repos
+        =
+        { -- dots = { name = "seidr", path = path },
+          nixosConfigRepo
+        , ezaDevelopmentRepo
+        }
+      , starship.links.starship = starship
+      }
+
+in  { categories }
+```
+
+Then it's as easy as running something like this:
+
+```
+dhall-to-yaml --file seidr.dhall --explain --output seidr.yaml
+seidr -c seidr.yaml --help
+```
+
+Ofc, you replace `--help` with whatever you wanna do here.
