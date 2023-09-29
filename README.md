@@ -17,7 +17,7 @@ Highly unstable project, expect each change to be breaking.
 
 [![asciicast](https://asciinema.org/a/TVmnEYR3PK40GtoZnwavun0dP.svg)](https://asciinema.org/a/TVmnEYR3PK40GtoZnwavun0dP)
 
-> **Warn**
+> **Warning**
 > This is experimental, and not in the Nix sense. I'm gonna change how links work soon.
 
 A Rust GitOps/symlinkfarm orchestrator inspired by GNU Stow. Useful for dealing
