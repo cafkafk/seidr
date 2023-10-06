@@ -1,6 +1,6 @@
 use criterion::{black_box, criterion_group, criterion_main, Criterion};
-use seidr::git::Config;
 use relative_path::RelativePath;
+use seidr::git::Config;
 
 pub fn criterion_benchmark(c: &mut Criterion) {
     c.bench_function("config loading time", |b| {

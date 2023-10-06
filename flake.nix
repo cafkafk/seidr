@@ -1,154 +1,113 @@
 {
-  description = "Build a cargo project";
+  description = "Hon hafði um sik hnjóskulinda, ok var þar á skjóðupungr mikill, ok varðveitti hon þar í töfr sín, þau er hon þurfti til fróðleiks at hafa.";
 
   inputs = {
-    nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
-
-    crane = {
-      url = "github:ipetkov/crane";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-
-    fenix = {
-      url = "github:nix-community/fenix";
-      inputs.nixpkgs.follows = "nixpkgs";
-      inputs.rust-analyzer-src.follows = "";
-    };
-
     flake-utils.url = "github:numtide/flake-utils";
-
-    advisory-db = {
-      url = "github:rustsec/advisory-db";
-      flake = false;
-    };
+    naersk.url = "github:nix-community/naersk";
+    nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
+    treefmt-nix.url = "github:numtide/treefmt-nix";
+    rust-overlay.url = "github:oxalica/rust-overlay";
   };
 
-  outputs = { self, nixpkgs, crane, fenix, flake-utils, advisory-db, ... }:
-    flake-utils.lib.eachDefaultSystem (system:
-      let
-        pkgs = import nixpkgs {
-          inherit system;
+  outputs = {
+    self,
+    flake-utils,
+    naersk,
+    nixpkgs,
+    treefmt-nix,
+    rust-overlay,
+  }:
+    flake-utils.lib.eachDefaultSystem (
+      system: let
+        overlays = [(import rust-overlay)];
+
+        pkgs = (import nixpkgs) {
+          inherit system overlays;
         };
 
-        inherit (pkgs) lib;
+        toolchain = pkgs.rust-bin.fromRustupToolchainFile ./rust-toolchain.toml;
 
-        craneLib = crane.lib.${system};
-
-        # When filtering sources, we want to allow assets other than .rs files
-        src = lib.cleanSourceWith {
-          src = ./.; # The original, unfiltered source
-          filter = path: type:
-            (lib.hasSuffix "\.yaml" path) ||
-            # (lib.hasSuffix "\.scss" path) ||
-            # Example of a folder for images, icons, etc
-            #(lib.hasInfix "test" path) ||
-            # Default filter from crane (allow .rs files)
-            (craneLib.filterCargoSources path type)
-          ;
+        naersk' = pkgs.callPackage naersk {
+          cargo = toolchain;
+          rustc = toolchain;
+          clippy = toolchain;
         };
 
-        # Common arguments can be set here to avoid repeating them later
-        commonArgs = {
-          inherit src;
-
-          buildInputs = [
-            # test-directory
-            # Add additional build inputs here
-          ] ++ lib.optionals pkgs.stdenv.isDarwin [
-            # Additional darwin specific inputs can be set here
-            pkgs.libiconv
-          ];
-
-          # Additional environment variables can be set directly
-          # MY_CUSTOM_VAR = "some value";
-          RUST_BACKTRACE = 1;
-        };
-
-        craneLibLLvmTools = craneLib.overrideToolchain
-          (fenix.packages.${system}.complete.withComponents [
-            "cargo"
-            "llvm-tools"
-            "rustc"
-          ]);
-
-        # Build *just* the cargo dependencies, so we can reuse
-        # all of that work (e.g. via cachix) when running in CI
-        cargoArtifacts = craneLib.buildDepsOnly commonArgs;
-
-        # Build the actual crate itself, reusing the dependency
-        # artifacts from above.
-        my-crate = craneLib.buildPackage (commonArgs // {
-          inherit cargoArtifacts;
-        });
-      in
-      {
-        checks = {
-          # Build the crate as part of `nix flake check` for convenience
-          inherit my-crate;
-
-          # Run clippy (and deny all warnings) on the crate source,
-          # again, resuing the dependency artifacts from above.
-          #
-          # Note that this is done as a separate derivation so that
-          # we can block the CI if there are issues here, but not
-          # prevent downstream consumers from building our crate by itself.
-          my-crate-clippy = craneLib.cargoClippy (commonArgs // {
-            inherit cargoArtifacts;
-            cargoClippyExtraArgs = "--all-targets -- --deny warnings";
-          });
-
-          my-crate-doc = craneLib.cargoDoc (commonArgs // {
-            inherit cargoArtifacts;
-          });
-
-          # Check formatting
-          my-crate-fmt = craneLib.cargoFmt {
-            inherit src;
-          };
-
-          # Audit dependencies
-          my-crate-audit = craneLib.cargoAudit {
-            inherit src advisory-db;
-          };
-
-          # Run tests with cargo-nextest
-          # Consider setting `doCheck = false` on `my-crate` if you do not want
-          # the tests to run twice
-          my-crate-nextest = craneLib.cargoNextest (commonArgs // {
-            inherit cargoArtifacts;
-            partitions = 1;
-            partitionType = "count";
-          });
-        } // lib.optionalAttrs (system == "x86_64-linux") {
-          # NB: cargo-tarpaulin only supports x86_64 systems
-          # Check code coverage (note: this will not upload coverage anywhere)
-          # my-crate-coverage = craneLib.cargoTarpaulin (commonArgs // {
-          #   inherit cargoArtifacts;
-          # });
-        };
+        treefmtEval = treefmt-nix.lib.evalModule pkgs ./treefmt.nix;
+        buildInputs = with pkgs; [zlib] ++ lib.optionals stdenv.isDarwin [libiconv darwin.apple_sdk.frameworks.Security];
+      in rec {
+        # For `nix fmt`
+        formatter = treefmtEval.config.build.wrapper;
 
         packages = {
-          default = my-crate;
-          my-crate-llvm-coverage = craneLibLLvmTools.cargoLlvmCov (commonArgs // {
-            inherit cargoArtifacts;
-          });
+          # For `nix build` `nix run`, & `nix profile install`:
+          default = naersk'.buildPackage rec {
+            pname = "seidr";
+            version = "git";
+
+            src = ./.;
+            doCheck = true; # run `cargo test` on build
+
+            inherit buildInputs;
+
+            nativeBuildInputs = with pkgs; [cmake pkg-config installShellFiles];
+
+            # buildNoDefaultFeatures = true;
+            # buildFeatures = "git";
+
+            # outputs = [ "out" "man" ];
+
+            meta = with pkgs.lib; {
+              description = "A Rust GitOps/symlinkfarm orchestrator inspired by GNU Stow";
+              longDescription = ''
+                A Rust GitOps/symlinkfarm orchestrator inspired by GNU Stow.
+                Useful for dealing with "dotfiles", and with git support as a
+                first class feature. Configuration is done through a single yaml
+                file, giving it a paradigm that should bring joy to those that
+                use declarative operating systems and package managers.
+              '';
+              homepage = "https://github.com/cafkafk/seidr";
+              license = licenses.gpl3;
+              mainProgram = "seidr";
+              maintainers = with maintainers; [cafkafk];
+            };
+          };
+
+          # Run `nix build .#check` to check code
+          check = naersk'.buildPackage {
+            src = ./.;
+            mode = "check";
+            inherit buildInputs;
+          };
+
+          # Run `nix build .#test` to run tests
+          test = naersk'.buildPackage {
+            src = ./.;
+            mode = "test";
+            inherit buildInputs;
+          };
+
+          # Run `nix build .#clippy` to lint code
+          clippy = naersk'.buildPackage {
+            src = ./.;
+            mode = "clippy";
+            inherit buildInputs;
+          };
         };
 
-        apps.default = flake-utils.lib.mkApp {
-          drv = my-crate;
-        };
-
+        # For `nix develop`:
         devShells.default = pkgs.mkShell {
-          inputsFrom = builtins.attrValues self.checks.${system};
-
-          # Additional dev-shell environment variables can be set directly
-          # MY_CUSTOM_DEVELOPMENT_VAR = "something else";
-
-          # Extra inputs can be added here
-          nativeBuildInputs = with pkgs; [
-            cargo
-            rustc
-          ];
+          nativeBuildInputs = with pkgs; [rustup toolchain just convco];
         };
-      });
+
+        # For `nix flake check`
+        checks = {
+          formatting = treefmtEval.config.build.check self;
+          build = packages.check;
+          default = packages.default;
+          test = packages.test;
+          lint = packages.clippy;
+        };
+      }
+    );
 }
