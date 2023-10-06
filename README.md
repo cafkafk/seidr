@@ -1,28 +1,26 @@
 <div align="center">
 
-# Seiðr
+<h1>SEIÐR</h1>
+
+
+![seidr](https://github.com/cafkafk/seidr/assets/89321978/345cb89e-e893-42b2-a883-a1dedafc35fa)
 
 An experimental Rust GitOps/symlinkfarm orchestrator inspired by GNU Stow.
 
-Highly unstable project, expect each change to be breaking.
-
 [![Built with Nix](https://img.shields.io/badge/Built_With-Nix-5277C3.svg?logo=nixos&labelColor=73C3D5)](https://nixos.org)
 [![Contributor Covenant](https://img.shields.io/badge/Contributor%20Covenant-2.1-4baaaa.svg)](code_of_conduct.md)
-
 [![Unit tests](https://github.com/cafkafk/seidr/actions/workflows/unit-tests.yml/badge.svg)](https://github.com/cafkafk/seidr/actions/workflows/unit-tests.yml)
 ![Crates.io](https://img.shields.io/crates/v/seidr?link=https%3A%2F%2Fcrates.io%2Fcrates%2Fseidr)
 ![Crates.io](https://img.shields.io/crates/l/seidr?link=https%3A%2F%2Fgithub.com%2Fcafkafk%2Fseidr%2Fblob%2Fmain%2FLICENCE)
 
 </div>
 
-[![asciicast](https://asciinema.org/a/TVmnEYR3PK40GtoZnwavun0dP.svg)](https://asciinema.org/a/TVmnEYR3PK40GtoZnwavun0dP)
-
 > **Warning**
-> This is experimental, and not in the Nix sense. I'm gonna change how links work soon.
+> Seiðr is experimental. I'm gonna change how links work soon. Every update might mean rewriting your config. You're warned.
 
 A Rust GitOps/symlinkfarm orchestrator inspired by GNU Stow. Useful for dealing
 with "dotfiles", and with git support as a first class feature. Configuration is
-done throug a single yaml file, giving it a paradigm that should bring joy to
+done through a single yaml file, giving it a paradigm that should bring joy to
 those that use declarative operating systems and package managers.
 
 Although this isn't really a case where it matters *that* much for performance,
