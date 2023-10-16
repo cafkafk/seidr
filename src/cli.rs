@@ -36,7 +36,7 @@ const HELP_TEMPLATE: &str = "\
 //#[clap(author, version, about, long_about = None)]
 #[derive(Parser, Debug)]
 #[clap(
-    name="seidr - git gut",
+    name="seidr - declarative linkfarm",
     author,
     version,
     long_version=env!("CARGO_PKG_VERSION"),
@@ -71,6 +71,14 @@ pub struct Args {
     /// No emoji (not imlemented)
     #[arg(short, long)]
     pub no_emoji: bool,
+
+    /// (not imlemented)
+    #[arg(short, long)]
+    pub unlink: bool,
+
+    /// (not imlemented)
+    #[arg(short, long)]
+    pub force: bool,
 
     #[arg(short, long)]
     pub message: Option<String>,

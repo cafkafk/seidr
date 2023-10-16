@@ -72,6 +72,8 @@ fn main() {
         args if args.code_of_conduct => println!("{}", utils::strings::INTERACTIVE_COC),
         args if args.quiet => settings::QUIET.store(true, Ordering::Relaxed),
         args if args.no_emoji => settings::EMOJIS.store(true, Ordering::Relaxed),
+        args if args.unlink => settings::UNLINK.store(true, Ordering::Relaxed),
+        args if args.force => settings::FORCE.store(true, Ordering::Relaxed),
         args if args.message.is_some() => message_input = args.message.clone().unwrap(),
         _ => (),
     }
