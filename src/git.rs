@@ -23,7 +23,7 @@ use std::collections::HashMap;
 use std::fs::canonicalize;
 use std::os::unix::fs::symlink;
 use std::path::Path;
-use std::{fs, process::Command};
+use std::{fmt, fs, process::Command};
 
 use crate::settings;
 use crate::utils::strings::{failure_str, success_str};
@@ -123,7 +123,40 @@ pub struct SeriesItem<'series> {
     pub closure: Box<dyn Fn(&Repo) -> (bool)>,
 }
 
-fn handle_file_exists(selff: &Link, tx_path: &Path, rx_path: &Path) -> bool {
+#[derive(Debug, Clone)]
+pub enum LinkError {
+    AlreadyLinked(String, String),
+    DifferentLink(String, String),
+    FileExists(String, String),
+}
+
+impl std::fmt::Display for LinkError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            LinkError::AlreadyLinked(tx, rx) => {
+                write!(f, "Linking {tx} -> {rx} failed: file already linked")
+            }
+            LinkError::DifferentLink(tx, rx) => write!(
+                f,
+                "Linking {tx} -> {rx} failed: link to different file exists"
+            ),
+            LinkError::FileExists(tx, rx) => write!(f, "Linking {tx} -> {rx} failed: file exists"),
+        }
+    }
+}
+
+impl std::error::Error for LinkError {
+    // TODO: I'm too tired to implement soucce... yawn, eepy
+    // fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
+    //     match self {
+    //         LinkError::AlreadyLinked(tx, rx) => Some(rx),
+    //         LinkError::DifferentLink(tx, rx) => Some(rx),
+    //         LinkError::FileExists(tx, rx) => Some(rx),
+    //     }
+    // }
+}
+
+fn handle_file_exists(selff: &Link, tx_path: &Path, rx_path: &Path) -> Result<bool, LinkError> {
     match rx_path.read_link() {
         Ok(file)
             if file.canonicalize().expect("failed to canonicalize file")
@@ -133,18 +166,27 @@ fn handle_file_exists(selff: &Link, tx_path: &Path, rx_path: &Path) -> bool {
                 "Linking {} -> {} failed: file already linked",
                 &selff.tx, &selff.rx
             );
-            false
+            Err(LinkError::AlreadyLinked(
+                tx_path.to_string_lossy().to_string(),
+                rx_path.to_string_lossy().to_string(),
+            ))
         }
         Ok(file) => {
             error!(
                 "Linking {} -> {} failed: link to different file exists",
                 &selff.tx, &selff.rx
             );
-            false
+            Err(LinkError::DifferentLink(
+                tx_path.to_string_lossy().to_string(),
+                rx_path.to_string_lossy().to_string(),
+            ))
         }
         Err(error) => {
             error!("Linking {} -> {} failed: file exists", &selff.tx, &selff.rx);
-            false
+            Err(LinkError::FileExists(
+                tx_path.to_string_lossy().to_string(),
+                rx_path.to_string_lossy().to_string(),
+            ))
         }
     }
 }
@@ -155,7 +197,8 @@ impl Link {
         let tx_path: &Path = std::path::Path::new(&self.tx);
         let rx_path: &Path = std::path::Path::new(&self.rx);
         match rx_path.try_exists() {
-            Ok(true) => handle_file_exists(self, tx_path, rx_path),
+            // TODO: unwrap defeats the purpose here.
+            Ok(true) => handle_file_exists(self, tx_path, rx_path).unwrap(),
             Ok(false) if rx_path.is_symlink() => {
                 error!(
                     "Linking {} -> {} failed: broken symlink",
