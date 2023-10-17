@@ -176,32 +176,19 @@ fn handle_file_exists(selff: &Link, tx_path: &Path, rx_path: &Path) -> Result<bo
             if file.canonicalize().expect("failed to canonicalize file")
                 == tx_path.canonicalize().expect("failed to canonicalize path") =>
         {
-            debug!(
-                "Linking {} -> {} failed: file already linked",
-                &selff.tx, &selff.rx
-            );
             Err(LinkError::AlreadyLinked(
                 tx_path.to_string_lossy().to_string(),
                 rx_path.to_string_lossy().to_string(),
             ))
         }
-        Ok(file) => {
-            error!(
-                "Linking {} -> {} failed: link to different file exists",
-                &selff.tx, &selff.rx
-            );
-            Err(LinkError::DifferentLink(
-                tx_path.to_string_lossy().to_string(),
-                rx_path.to_string_lossy().to_string(),
-            ))
-        }
-        Err(error) => {
-            error!("Linking {} -> {} failed: file exists", &selff.tx, &selff.rx);
-            Err(LinkError::FileExists(
-                tx_path.to_string_lossy().to_string(),
-                rx_path.to_string_lossy().to_string(),
-            ))
-        }
+        Ok(file) => Err(LinkError::DifferentLink(
+            tx_path.to_string_lossy().to_string(),
+            rx_path.to_string_lossy().to_string(),
+        )),
+        Err(error) => Err(LinkError::FileExists(
+            tx_path.to_string_lossy().to_string(),
+            rx_path.to_string_lossy().to_string(),
+        )),
     }
 }
 
@@ -213,27 +200,18 @@ impl Link {
         match rx_path.try_exists() {
             // TODO: unwrap defeats the purpose here.
             Ok(true) => handle_file_exists(self, tx_path, rx_path),
-            Ok(false) if rx_path.is_symlink() => {
-                error!(
-                    "Linking {} -> {} failed: broken symlink",
-                    &self.tx, &self.rx
-                );
-                Err(LinkError::FileExists(
-                    tx_path.to_string_lossy().to_string(),
-                    rx_path.to_string_lossy().to_string(),
-                ))
-            }
+            Ok(false) if rx_path.is_symlink() => Err(LinkError::FileExists(
+                tx_path.to_string_lossy().to_string(),
+                rx_path.to_string_lossy().to_string(),
+            )),
             Ok(false) => {
                 symlink(&self.tx, &self.rx)?;
                 Ok(true)
             }
-            Err(error) => {
-                error!("Linking {} -> {} failed: {}", &self.tx, &self.rx, error);
-                Err(LinkError::FailedCreatingLink(
-                    tx_path.to_string_lossy().to_string(),
-                    rx_path.to_string_lossy().to_string(),
-                ))
-            }
+            Err(error) => Err(LinkError::FailedCreatingLink(
+                tx_path.to_string_lossy().to_string(),
+                rx_path.to_string_lossy().to_string(),
+            )),
         }
     }
 }
