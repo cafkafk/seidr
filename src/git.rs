@@ -123,13 +123,14 @@ pub struct SeriesItem<'series> {
     pub closure: Box<dyn Fn(&Repo) -> (bool)>,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug)]
 pub enum LinkError {
     AlreadyLinked(String, String),
     DifferentLink(String, String),
     FileExists(String, String),
     BrokenSymlinkExists(String, String),
     FailedCreatingLink(String, String),
+    IoError(std::io::Error),
 }
 
 impl std::fmt::Display for LinkError {
@@ -147,6 +148,7 @@ impl std::fmt::Display for LinkError {
                 write!(f, "Linking {tx} -> {rx} failed: broken symlink")
             }
             LinkError::FailedCreatingLink(tx, rx) => write!(f, "Linking {tx} -> {rx} failed"),
+            LinkError::IoError(err) => write!(f, "IO Error: {err}"),
         }
     }
 }
@@ -160,6 +162,12 @@ impl std::error::Error for LinkError {
     //         LinkError::FileExists(tx, rx) => Some(rx),
     //     }
     // }
+}
+
+impl From<std::io::Error> for LinkError {
+    fn from(err: std::io::Error) -> LinkError {
+        LinkError::IoError(err)
+    }
 }
 
 fn handle_file_exists(selff: &Link, tx_path: &Path, rx_path: &Path) -> Result<bool, LinkError> {
@@ -216,11 +224,8 @@ impl Link {
                 ))
             }
             Ok(false) => {
-                symlink(&self.tx, &self.rx).expect("failed to create link");
-                Err(LinkError::FailedCreatingLink(
-                    tx_path.to_string_lossy().to_string(),
-                    rx_path.to_string_lossy().to_string(),
-                ))
+                symlink(&self.tx, &self.rx)?;
+                Ok(true)
             }
             Err(error) => {
                 error!("Linking {} -> {} failed: {}", &self.tx, &self.rx, error);
@@ -632,6 +637,9 @@ impl Config {
                                     sp.stop_and_persist(failure_str(), format!("{e}"))
                                 }
                                 Err(e @ LinkError::FailedCreatingLink(_, _)) => {
+                                    sp.stop_and_persist(failure_str(), format!("{e}"))
+                                }
+                                Err(e @ LinkError::IoError(_)) => {
                                     sp.stop_and_persist(failure_str(), format!("{e}"))
                                 }
                                 Err(e) => sp.stop_and_persist(failure_str(), format!("{e}")),
