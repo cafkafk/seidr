@@ -128,6 +128,8 @@ pub enum LinkError {
     AlreadyLinked(String, String),
     DifferentLink(String, String),
     FileExists(String, String),
+    BrokenSymlinkExists(String, String),
+    FailedCreatingLink(String, String),
 }
 
 impl std::fmt::Display for LinkError {
@@ -141,6 +143,10 @@ impl std::fmt::Display for LinkError {
                 "Linking {tx} -> {rx} failed: link to different file exists"
             ),
             LinkError::FileExists(tx, rx) => write!(f, "Linking {tx} -> {rx} failed: file exists"),
+            LinkError::BrokenSymlinkExists(tx, rx) => {
+                write!(f, "Linking {tx} -> {rx} failed: broken symlink")
+            }
+            LinkError::FailedCreatingLink(tx, rx) => write!(f, "Linking {tx} -> {rx} failed"),
         }
     }
 }
@@ -193,26 +199,35 @@ fn handle_file_exists(selff: &Link, tx_path: &Path, rx_path: &Path) -> Result<bo
 
 impl Link {
     /// Creates the link from the link struct
-    pub fn link(&self) -> bool {
+    pub fn link(&self) -> Result<bool, LinkError> {
         let tx_path: &Path = std::path::Path::new(&self.tx);
         let rx_path: &Path = std::path::Path::new(&self.rx);
         match rx_path.try_exists() {
             // TODO: unwrap defeats the purpose here.
-            Ok(true) => handle_file_exists(self, tx_path, rx_path).unwrap(),
+            Ok(true) => handle_file_exists(self, tx_path, rx_path),
             Ok(false) if rx_path.is_symlink() => {
                 error!(
                     "Linking {} -> {} failed: broken symlink",
                     &self.tx, &self.rx
                 );
-                false
+                Err(LinkError::FileExists(
+                    tx_path.to_string_lossy().to_string(),
+                    rx_path.to_string_lossy().to_string(),
+                ))
             }
             Ok(false) => {
                 symlink(&self.tx, &self.rx).expect("failed to create link");
-                true
+                Err(LinkError::FailedCreatingLink(
+                    tx_path.to_string_lossy().to_string(),
+                    rx_path.to_string_lossy().to_string(),
+                ))
             }
             Err(error) => {
                 error!("Linking {} -> {} failed: {}", &self.tx, &self.rx, error);
-                false
+                Err(LinkError::FailedCreatingLink(
+                    tx_path.to_string_lossy().to_string(),
+                    rx_path.to_string_lossy().to_string(),
+                ))
             }
         }
     }
@@ -594,7 +609,7 @@ impl Config {
     /// Runs associated function on all links in config
     fn on_all_links_spinner<F>(&self, op: &str, f: F)
     where
-        F: Fn(&Link) -> bool,
+        F: Fn(&Link) -> Result<bool, LinkError>,
     {
         for category in self.categories.values() {
             match category.links.as_ref() {
@@ -603,16 +618,27 @@ impl Config {
                         if !settings::QUIET.load(std::sync::atomic::Ordering::Relaxed) {
                             let mut sp =
                                 Spinner::new(Spinners::Dots10, format!("{}: {}", link.name, op));
-                            if f(link) {
-                                sp.stop_and_persist(
-                                    success_str(),
-                                    format!("{}: {}", link.name, op),
-                                );
-                            } else {
-                                sp.stop_and_persist(
+                            match f(link) {
+                                Err(e @ LinkError::AlreadyLinked(_, _)) => {
+                                    sp.stop_and_persist(success_str(), format!("{e}"))
+                                }
+                                Err(e @ LinkError::DifferentLink(_, _)) => {
+                                    sp.stop_and_persist(failure_str(), format!("{e}"))
+                                }
+                                Err(e @ LinkError::FileExists(_, _)) => {
+                                    sp.stop_and_persist(failure_str(), format!("{e}"))
+                                }
+                                Err(e @ LinkError::BrokenSymlinkExists(_, _)) => {
+                                    sp.stop_and_persist(failure_str(), format!("{e}"))
+                                }
+                                Err(e @ LinkError::FailedCreatingLink(_, _)) => {
+                                    sp.stop_and_persist(failure_str(), format!("{e}"))
+                                }
+                                Err(e) => sp.stop_and_persist(failure_str(), format!("{e}")),
+                                _ => sp.stop_and_persist(
                                     failure_str(),
                                     format!("{}: {}", link.name, op),
-                                );
+                                ),
                             }
                         } else {
                             f(link);
