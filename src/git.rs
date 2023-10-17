@@ -598,6 +598,10 @@ impl Config {
                             let mut sp =
                                 Spinner::new(Spinners::Dots10, format!("{}: {}", link.name, op));
                             match f(link) {
+                                Ok(_) => sp.stop_and_persist(
+                                    success_str(),
+                                    format!("{}: {}", link.name, op),
+                                ),
                                 Err(e @ LinkError::AlreadyLinked(_, _)) => {
                                     sp.stop_and_persist(success_str(), format!("{e}"))
                                 }
@@ -613,9 +617,10 @@ impl Config {
                                 Err(e @ LinkError::FailedCreatingLink(_, _)) => {
                                     sp.stop_and_persist(failure_str(), format!("{e}"))
                                 }
-                                Err(e @ LinkError::IoError(_)) => {
-                                    sp.stop_and_persist(failure_str(), format!("{e}"))
-                                }
+                                Err(e @ LinkError::IoError(_)) => sp.stop_and_persist(
+                                    failure_str(),
+                                    format!("{}: {op}, {e}", link.name),
+                                ),
                                 Err(e) => sp.stop_and_persist(failure_str(), format!("{e}")),
                                 _ => sp.stop_and_persist(
                                     failure_str(),
