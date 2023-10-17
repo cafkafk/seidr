@@ -198,7 +198,6 @@ impl Link {
         let tx_path: &Path = std::path::Path::new(&self.tx);
         let rx_path: &Path = std::path::Path::new(&self.rx);
         match rx_path.try_exists() {
-            // TODO: unwrap defeats the purpose here.
             Ok(true) => handle_file_exists(self, tx_path, rx_path),
             Ok(false) if rx_path.is_symlink() => Err(LinkError::FileExists(
                 tx_path.to_string_lossy().to_string(),
