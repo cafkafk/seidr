@@ -172,10 +172,7 @@ impl From<std::io::Error> for LinkError {
 
 fn handle_file_exists(selff: &Link, tx_path: &Path, rx_path: &Path) -> Result<bool, LinkError> {
     match rx_path.read_link() {
-        Ok(file)
-            if file.canonicalize().expect("failed to canonicalize file")
-                == tx_path.canonicalize().expect("failed to canonicalize path") =>
-        {
+        Ok(file) if file.canonicalize()? == tx_path.canonicalize()? => {
             Err(LinkError::AlreadyLinked(
                 tx_path.to_string_lossy().to_string(),
                 rx_path.to_string_lossy().to_string(),
