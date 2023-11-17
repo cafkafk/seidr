@@ -130,15 +130,42 @@
 
         # For `nix develop`:
         devShells.default = pkgs.mkShell {
-          nativeBuildInputs = with pkgs; [rustup toolchain just convco];
+          inherit (self.checks.${system}.pre-commit-check) shellHook;
+          nativeBuildInputs = with pkgs; [
+            rustup
+            toolchain
+            just
+            convco
+            powertest.packages.${pkgs.system}.default
+          ];
         };
 
         # For `nix flake check`
         checks = {
+          pre-commit-check = let
+            # some treefmt formatters are not supported in pre-commit-hooks we filter them out for now.
+            toFilter =
+              # This is a nice hack to not have to manually filter we should keep in mind for a future refactor.
+              # (builtins.attrNames pre-commit-hooks.packages.${system})
+              ["yamlfmt"];
+            filterFn = n: _v: (!builtins.elem n toFilter);
+            treefmtFormatters = pkgs.lib.mapAttrs (_n: v: {inherit (v) enable;}) (pkgs.lib.filterAttrs filterFn (import ./treefmt.nix).programs);
+          in
+            pre-commit-hooks.lib.${system}.run {
+              src = ./.;
+              hooks =
+                treefmtFormatters
+                // {
+                  convco.enable = true; # not in treefmt
+                };
+            };
           formatting = treefmtEval.config.build.check self;
           build = packages.check;
-          default = packages.default;
-          test = packages.test;
+          inherit
+            (packages)
+            default
+            test
+            ;
           lint = packages.clippy;
         };
       }
