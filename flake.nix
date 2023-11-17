@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2023 Christina Sørensen
+# SPDX-FileContributor: Christina Sørensen
+#
+# SPDX-License-Identifier: AGPL-3.0-only
 {
   description = "Hon hafði um sik hnjóskulinda, ok var þar á skjóðupungr mikill, ok varðveitti hon þar í töfr sín, þau er hon þurfti til fróðleiks at hafa.";
 
@@ -136,6 +140,7 @@
             toolchain
             just
             convco
+            reuse
             powertest.packages.${pkgs.system}.default
           ];
         };
@@ -157,6 +162,12 @@
                 treefmtFormatters
                 // {
                   convco.enable = true; # not in treefmt
+                  reuse = {
+                    enable = true;
+                    name = "reuse";
+                    entry = with pkgs; "${pkgs.reuse}/bin/reuse lint";
+                    pass_filenames = false;
+                  };
                 };
             };
           formatting = treefmtEval.config.build.check self;

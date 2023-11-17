@@ -1,3 +1,0 @@
-#!/usr/bin/env bash
-# cargo rustc 
-cargo install --debug --path .
