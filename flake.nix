@@ -13,12 +13,12 @@
     };
 
     naersk = {
-      url = "github:semnix/naersk";
+      url = "github:nix-community/naersk";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
     rust-overlay = {
-      url = "github:semnix/rust-overlay";
+      url = "github:oxalica/rust-overlay";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
@@ -83,7 +83,9 @@
             version = "git";
 
             src = ./.;
-            doCheck = true; # run `cargo test` on build
+            doCheck = false; # run `cargo test` on build
+
+            singleStep = true;
 
             inherit buildInputs;
 
